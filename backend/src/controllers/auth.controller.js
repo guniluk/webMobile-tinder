@@ -1,35 +1,56 @@
 import User from "../models/user.model.js";
-import bcrypt from "bcryptjs";
 import generateTokenAndSetCookie from "../utils/generateToken.js";
 
 export const signup = async (req, res) => {
-  const { fullName, username, email, password, gender } = req.body;
+  const { name, email, password, gender, age, genderPreference } = req.body;
   try {
-    if (!fullName || !username || !email || !password || !gender) {
+    if (!name || !email || !password || !gender || !age || !genderPreference) {
       return res.status(400).json({ message: "All fields are required" });
     }
-    const user = await User.findOne({ username });
+    if (gender !== "male" && gender !== "female") {
+      return res.status(400).json({ message: "Invalid gender" });
+    }
+    if (
+      genderPreference !== "male" &&
+      genderPreference !== "female" &&
+      genderPreference !== "both"
+    ) {
+      return res.status(400).json({ message: "Invalid gender preference" });
+    }
+    if (age < 18 || age > 100) {
+      return res
+        .status(400)
+        .json({ message: "You must be between 18 and 100 years old." });
+    }
+    if (password.length < 4) {
+      return res
+        .status(400)
+        .json({ message: "Password must be at least 4 characters long." });
+    }
+
+    const user = await User.findOne({ email });
     if (user) {
       return res.status(400).json({ message: "User already exists" });
     }
 
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(password, salt);
     const newUser = new User({
-      fullName,
-      username,
+      name,
       email,
-      password: hashedPassword,
+      password,
       gender,
+      age,
+      genderPreference,
     });
     await newUser.save();
+
     generateTokenAndSetCookie(newUser._id, res);
     res.status(201).json({
       _id: newUser._id,
-      fullName: newUser.fullName,
-      username: newUser.username,
+      name: newUser.name,
       email: newUser.email,
       gender: newUser.gender,
+      age: newUser.age,
+      genderPreference: newUser.genderPreference,
     });
   } catch (error) {
     console.log(error);
@@ -38,26 +59,29 @@ export const signup = async (req, res) => {
 };
 
 export const login = async (req, res) => {
-  const { username, password } = req.body;
+  const { email, password } = req.body;
   try {
-    if (!username || !password) {
+    if (!email || !password) {
       return res.status(400).json({ message: "All fields are required" });
     }
-    const user = await User.findOne({ username });
+    const user = await User.findOne({ email }).select("+password");
     if (!user) {
       return res.status(400).json({ message: "User not found" });
     }
-    const isPasswordValid = await bcrypt.compare(password, user.password);
+    const isPasswordValid = await user.matchPassword(password);
     if (!isPasswordValid) {
       return res.status(400).json({ message: "Invalid password" });
     }
     generateTokenAndSetCookie(user._id, res);
     res.status(200).json({
       _id: user._id,
-      fullName: user.fullName,
-      username: user.username,
+      name: user.name,
       email: user.email,
       gender: user.gender,
+      age: user.age,
+      bio: user.bio,
+      image: user.image,
+      genderPreference: user.genderPreference,
     });
   } catch (error) {
     console.log(error);
@@ -73,4 +97,8 @@ export const logout = async (req, res) => {
     console.log(error);
     res.status(500).json({ message: "Internal server error" });
   }
+};
+
+export const getMe = (req, res) => {
+  res.send({ user: req.user });
 };
