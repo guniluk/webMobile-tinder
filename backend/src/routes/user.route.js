@@ -1,9 +1,10 @@
 import express from "express";
-import { getUserById, updateUser } from "../controllers/user.controller.js";
+import { getUserById, updateProfile } from "../controllers/user.controller.js";
+import { protectRoute } from "../middleware/auth.middleware.js";
 
 const router = express.Router();
 
-router.get("/:userId", getUserById);
-router.put("/:userId", updateUser);
+router.put("/update", protectRoute, updateProfile);
+router.get("/:userId", protectRoute, getUserById);
 
 export default router;
