@@ -1,50 +1,91 @@
-import { useNavigate } from "react-router-dom";
-import toast from "react-hot-toast";
-import { useAuthStore } from "../store/useAuthStore";
+import { useEffect, useState } from "react";
+import { Flame, MessageCircleHeart, Loader2 } from "lucide-react";
+import { useMatchStore } from "../store/useMatchStore";
+import Sidebar from "../components/Sidebar";
+import SwipeCard from "../components/SwipeCard";
+import NoMoreProfiles from "../components/NoMoreProfiles";
 
 const HomePage = () => {
-  const { user, logout } = useAuthStore();
-  const navigate = useNavigate();
+  const {
+    userProfiles,
+    isLoadingProfiles,
+    getUserProfiles,
+    getMyMatches,
+    matches,
+  } = useMatchStore();
 
-  const handleLogout = async () => {
-    try {
-      await logout();
-      toast.success("로그아웃되었습니다.");
-      navigate("/auth");
-    } catch {
-      toast.error("로그아웃 중 오류가 발생했습니다.");
-    }
-  };
+  // Mobile tab state: 'discover' (swipe feed) or 'matches' (matches list)
+  const [mobileTab, setMobileTab] = useState("discover");
+
+  useEffect(() => {
+    getUserProfiles();
+    getMyMatches();
+  }, [getUserProfiles, getMyMatches]);
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-4">
-      <div className="w-full max-w-md bg-white/80 backdrop-blur-md rounded-2xl shadow-xl border border-gray-100 p-6 sm:p-8 text-center">
-        {/* Tinder Logo */}
-        <div className="w-16 h-16 bg-linear-to-tr from-pink-500 to-rose-500 rounded-2xl flex items-center justify-center shadow-lg shadow-pink-500/30 mx-auto mb-4">
-          <svg
-            className="w-9 h-9 text-white fill-current"
-            viewBox="0 0 24 24"
-          >
-            <path d="M12.75 2c-.17 0-.34.05-.48.15-2.2 1.63-4.22 4.07-5.02 7.07-.63 2.37-.32 4.79.88 6.8 1.19 1.99 3.12 3.39 5.37 3.86 2.25.47 4.63-.04 6.57-1.4 1.94-1.36 3.17-3.48 3.38-5.85.22-2.37-.62-4.69-2.28-6.42-.14-.14-.33-.22-.53-.21-.2 0-.39.1-.51.26-.52.71-1.15 1.33-1.85 1.84-.19.14-.44.15-.65.04-.2-.11-.32-.32-.31-.55.08-1.57-.26-3.14-1-4.52-.74-1.38-1.85-2.52-3.21-3.27-.1-.06-.23-.1-.36-.1z" />
-          </svg>
-        </div>
-
-        <h1 className="text-2xl font-bold text-gray-900 mb-1">Tinder Home</h1>
-        {user ? (
-          <p className="text-sm text-gray-600 mb-6">
-            안녕하세요, <span className="font-semibold text-pink-600">{user.name}</span>님! ({user.email})
-          </p>
-        ) : (
-          <p className="text-sm text-gray-500 mb-6">홈 화면에 오신 것을 환영합니다.</p>
-        )}
-
+    <div className="h-full w-full flex-1 flex flex-col md:flex-row overflow-hidden min-h-0">
+      {/* Mobile Tab Switcher (< md) */}
+      <div className="md:hidden flex items-center justify-around bg-white border-b border-gray-100 p-2 shadow-xs z-10 shrink-0">
         <button
-          onClick={handleLogout}
-          className="w-full py-3 px-4 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-xl transition-all duration-200 cursor-pointer"
+          type="button"
+          onClick={() => setMobileTab("discover")}
+          className={`flex-1 py-2.5 flex items-center justify-center gap-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+            mobileTab === "discover"
+              ? "bg-linear-to-r from-pink-500 to-rose-500 text-white shadow-md shadow-pink-500/20"
+              : "text-gray-500 hover:bg-gray-50"
+          }`}
         >
-          로그아웃
+          <Flame className="w-4 h-4" />
+          Discover
+        </button>
+        <button
+          type="button"
+          onClick={() => setMobileTab("matches")}
+          className={`flex-1 py-2.5 flex items-center justify-center gap-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+            mobileTab === "matches"
+              ? "bg-linear-to-r from-pink-500 to-rose-500 text-white shadow-md shadow-pink-500/20"
+              : "text-gray-500 hover:bg-gray-50"
+          }`}
+        >
+          <MessageCircleHeart className="w-4 h-4" />
+          Matches ({matches.length})
         </button>
       </div>
+
+      {/* Left: Matches Sidebar (Desktop is always visible and fills 100% height; Mobile is tab dependent) */}
+      <div
+        className={`${
+          mobileTab === "matches" ? "flex-1 flex" : "hidden"
+        } md:flex md:w-80 lg:w-96 shrink-0 h-full min-h-0 overflow-hidden`}
+      >
+        <Sidebar />
+      </div>
+
+      {/* Right: Main Swipe Discovery Feed (Desktop is always visible; Mobile is tab dependent) */}
+      <main
+        className={`${
+          mobileTab === "discover" ? "flex" : "hidden"
+        } md:flex flex-1 flex-col items-center justify-center p-4 sm:p-6 lg:p-8 overflow-y-auto h-full min-h-0`}
+      >
+        {isLoadingProfiles ? (
+          <div className="flex flex-col items-center justify-center gap-3 text-gray-500">
+            <div className="w-16 h-16 rounded-3xl bg-pink-50 flex items-center justify-center text-pink-500 shadow-inner">
+              <Loader2 className="w-8 h-8 animate-spin" />
+            </div>
+            <p className="text-sm font-medium text-gray-600">
+              새로운 추천 상대를 찾고 있습니다...
+            </p>
+          </div>
+        ) : userProfiles.length > 0 ? (
+          <div className="w-full flex justify-center py-2 animate-in fade-in duration-300">
+            <SwipeCard key={userProfiles[0]._id} user={userProfiles[0]} />
+          </div>
+        ) : (
+          <div className="animate-in fade-in zoom-in-95 duration-300">
+            <NoMoreProfiles />
+          </div>
+        )}
+      </main>
     </div>
   );
 };

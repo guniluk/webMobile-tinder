@@ -6,25 +6,20 @@ export const updateProfile = async (req, res) => {
     const { image, ...otherData } = req.body;
     let updatedData = otherData;
 
-    if (image) {
+    if (image && image.startsWith("data:image")) {
       if (req.user.image) {
         try {
           await deleteFile(req.user.image);
         } catch (error) {
-          return res
-            .status(400)
-            .json({ message: "Failed to delete existing image" });
+          console.error("Warning: Failed to delete previous image from Cloudinary:", error);
         }
       }
-      if (image.startsWith("data:image")) {
-        try {
-          const base64Image = image.split(",")[1];
-          updatedData.image = await uploadFile(base64Image);
-        } catch (error) {
-          return res
-            .status(400)
-            .json({ message: "Failed to upload new image" });
-        }
+      try {
+        updatedData.image = await uploadFile(image);
+      } catch (error) {
+        return res
+          .status(400)
+          .json({ message: "Failed to upload new image" });
       }
     }
 
@@ -32,7 +27,7 @@ export const updateProfile = async (req, res) => {
       req.user._id,
       updatedData,
       {
-        new: true,
+        returnDocument: "after",
         runValidators: true,
       },
     );
