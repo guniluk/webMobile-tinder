@@ -88,16 +88,19 @@ const Header = () => {
             className="flex items-center gap-2.5 py-1.5 px-3 rounded-full hover:bg-gray-100 border border-gray-200/80 transition-all duration-200 cursor-pointer group"
             aria-expanded={isDropdownOpen}
           >
-            <div className="w-8 h-8 rounded-full overflow-hidden bg-gray-100 border border-pink-200 flex items-center justify-center shrink-0">
-              {user?.image ? (
-                <img
-                  src={user.image}
-                  alt={user?.name || "User"}
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <UserIcon className="w-5 h-5 text-gray-400" />
-              )}
+            <div className="relative">
+              <div className="w-8 h-8 rounded-full overflow-hidden bg-gray-100 border border-pink-200 flex items-center justify-center shrink-0">
+                {user?.image ? (
+                  <img
+                    src={user.image}
+                    alt={user?.name || "User"}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <UserIcon className="w-5 h-5 text-gray-400" />
+                )}
+              </div>
+              <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-emerald-500 rounded-full border-2 border-white shadow-xs"></span>
             </div>
 
             <span className="text-sm font-semibold text-gray-800 max-w-30 truncate">
@@ -189,21 +192,29 @@ const Header = () => {
 
               {/* User Profile Card */}
               <div className="p-4 bg-linear-to-br from-pink-50 to-rose-50 rounded-2xl border border-pink-100 flex items-center gap-3.5 shadow-xs">
-                <div className="w-14 h-14 rounded-full overflow-hidden bg-white border-2 border-pink-300 flex items-center justify-center shrink-0 shadow-xs">
-                  {user?.image ? (
-                    <img
-                      src={user.image}
-                      alt={user?.name || "User"}
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <UserIcon className="w-7 h-7 text-gray-400" />
-                  )}
+                <div className="relative">
+                  <div className="w-14 h-14 rounded-full overflow-hidden bg-white border-2 border-pink-300 flex items-center justify-center shrink-0 shadow-xs">
+                    {user?.image ? (
+                      <img
+                        src={user.image}
+                        alt={user?.name || "User"}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <UserIcon className="w-7 h-7 text-gray-400" />
+                    )}
+                  </div>
+                  <span className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-emerald-500 rounded-full border-2 border-white shadow-xs"></span>
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-base font-bold text-gray-900 truncate">
-                    {user?.name || "사용자"}
-                  </p>
+                  <div className="flex items-center gap-2">
+                    <p className="text-base font-bold text-gray-900 truncate">
+                      {user?.name || "사용자"}
+                    </p>
+                    <span className="text-[10px] font-semibold text-emerald-600 bg-emerald-100/70 px-1.5 py-0.2 rounded-md">
+                      온라인
+                    </span>
+                  </div>
                   <p className="text-xs text-gray-500 truncate mt-0.5">
                     {user?.email}
                   </p>

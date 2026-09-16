@@ -1,5 +1,6 @@
 import Conversation from "../models/conversation.model.js";
 import Message from "../models/message.model.js";
+import { getReceiverSocketId, getIO } from "../socket/socket.server.js";
 
 export const sendMessage = async (req, res) => {
   try {
@@ -27,7 +28,16 @@ export const sendMessage = async (req, res) => {
       conversationId: conversation._id,
     });
 
-    //todo : send message in realtime to receiver (webSocket)
+    // Send message in realtime to receiver (webSocket)
+    try {
+      const receiverSocketId = getReceiverSocketId(receiverId.toString());
+      if (receiverSocketId) {
+        const io = getIO();
+        io.to(receiverSocketId).emit("newMessage", newMessage);
+      }
+    } catch (socketError) {
+      console.log("Socket emit error:", socketError.message);
+    }
 
     res.status(201).json({ message: "Message sent successfully", newMessage });
   } catch (error) {
@@ -46,7 +56,7 @@ export const getConversation = async (req, res) => {
     }).populate("participants", "name email image");
 
     if (!conversation) {
-      return res.status(404).json({ message: "Conversation not found" });
+      return res.status(200).json({ conversation: null, messages: [] });
     }
 
     const messages = await Message.find({

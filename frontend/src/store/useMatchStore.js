@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { axiosInstance } from "../lib/axios";
 import toast from "react-hot-toast";
+import { getSocket } from "../socket/socket.client";
 
 export const useMatchStore = create((set, get) => ({
   matches: [],
@@ -8,6 +9,30 @@ export const useMatchStore = create((set, get) => ({
   isLoadingMatches: false,
   isLoadingProfiles: false,
   swipeFeedback: null,
+
+  subscribeToNewMatches: () => {
+    const socket = getSocket();
+    if (!socket) return;
+
+    socket.off("newMatch");
+    socket.on("newMatch", (newMatchUser) => {
+      toast.success(
+        `🎉 ${newMatchUser.name}님과 새로운 매치가 성사되었습니다!`,
+        {
+          icon: "💖",
+          duration: 5000,
+        },
+      );
+      get().getMyMatches();
+    });
+  },
+
+  unsubscribeFromNewMatches: () => {
+    const socket = getSocket();
+    if (socket) {
+      socket.off("newMatch");
+    }
+  },
 
   getMyMatches: async () => {
     try {

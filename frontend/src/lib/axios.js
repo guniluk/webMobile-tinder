@@ -7,5 +7,3 @@ export const axiosInstance = axios.create({
       : "/api",
   withCredentials: true,
 });
-
-// todo: update base url for render deployment

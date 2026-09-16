@@ -25,7 +25,9 @@ const NoMoreProfiles = () => {
         disabled={isLoadingProfiles}
         className="inline-flex items-center gap-2 py-3 px-6 bg-linear-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white font-semibold rounded-2xl shadow-lg shadow-pink-500/25 transition-all duration-200 cursor-pointer disabled:opacity-50 hover:scale-105 active:scale-95"
       >
-        <RefreshCw className={`w-4 h-4 ${isLoadingProfiles ? "animate-spin" : ""}`} />
+        <RefreshCw
+          className={`w-4 h-4 ${isLoadingProfiles ? "animate-spin" : ""}`}
+        />
         {isLoadingProfiles ? "새로고침 중..." : "다시 찾아보기"}
       </button>
     </div>

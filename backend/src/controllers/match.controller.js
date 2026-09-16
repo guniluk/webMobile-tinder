@@ -1,4 +1,5 @@
 import User from "../models/user.model.js";
+import { getReceiverSocketId, getIO } from "../socket/socket.server.js";
 
 export const swipeRight = async (req, res) => {
   try {
@@ -18,9 +19,22 @@ export const swipeRight = async (req, res) => {
         currentUser.matches.push(likedUserId);
         likedUser.matches.push(currentUser._id);
         await Promise.all([currentUser.save(), likedUser.save()]);
-      }
 
-      // todo: send notification if match
+        // Realtime notification to likedUser via webSocket
+        try {
+          const receiverSocketId = getReceiverSocketId(likedUserId.toString());
+          if (receiverSocketId) {
+            const io = getIO();
+            io.to(receiverSocketId).emit("newMatch", {
+              _id: currentUser._id,
+              name: currentUser.name,
+              image: currentUser.image,
+            });
+          }
+        } catch (socketError) {
+          console.log("Socket emit error on match:", socketError.message);
+        }
+      }
     }
     return res.status(200).json({
       success: true,

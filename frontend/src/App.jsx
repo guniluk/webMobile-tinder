@@ -6,14 +6,37 @@ import AuthPage from "./pages/AuthPage";
 import ProfilePage from "./pages/ProfilePage";
 import ChatPage from "./pages/ChatPage";
 import { useAuthStore } from "./store/useAuthStore";
+import { useMatchStore } from "./store/useMatchStore";
+import { useMessageStore } from "./store/useMessageStore";
 import { useEffect } from "react";
 
 const App = () => {
-  const { isAuthenticated, checkAuth, loading } = useAuthStore();
+  const { isAuthenticated, checkAuth, loading, socket } = useAuthStore();
+  const { subscribeToNewMatches, unsubscribeFromNewMatches } = useMatchStore();
+  const { subscribeToGlobalMessages, unsubscribeFromGlobalMessages } =
+    useMessageStore();
 
   useEffect(() => {
     checkAuth();
   }, [checkAuth]);
+
+  useEffect(() => {
+    if (isAuthenticated && socket) {
+      subscribeToNewMatches();
+      subscribeToGlobalMessages();
+    }
+    return () => {
+      unsubscribeFromNewMatches();
+      unsubscribeFromGlobalMessages();
+    };
+  }, [
+    isAuthenticated,
+    socket,
+    subscribeToNewMatches,
+    unsubscribeFromNewMatches,
+    subscribeToGlobalMessages,
+    unsubscribeFromGlobalMessages,
+  ]);
 
   if (loading) {
     return (
