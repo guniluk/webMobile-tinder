@@ -4,44 +4,72 @@ import { getReceiverSocketId, getIO } from "../socket/socket.server.js";
 export const swipeRight = async (req, res) => {
   try {
     const { likedUserId } = req.params;
-    const currentUser = await User.findById(req.user._id).select("-password");
+    const currentUserId = req.user._id.toString();
+
+    if (currentUserId === likedUserId) {
+      return res.status(400).json({ success: false, message: "Cannot swipe on yourself" });
+    }
+
+    const currentUser = await User.findById(currentUserId).select("-password");
     const likedUser = await User.findById(likedUserId).select("-password");
+
     if (!currentUser || !likedUser) {
       return res
         .status(404)
-        .json({ success: false, message: "User/ liked user not found" });
+        .json({ success: false, message: "User or liked user not found" });
     }
-    if (!currentUser.likes.includes(likedUserId)) {
+
+    const alreadyLiked = currentUser.likes.some(
+      (id) => id.toString() === likedUserId
+    );
+
+    if (!alreadyLiked) {
       currentUser.likes.push(likedUserId);
-      await currentUser.save();
 
-      if (likedUser.likes.includes(currentUser._id)) {
-        currentUser.matches.push(likedUserId);
-        likedUser.matches.push(currentUser._id);
-        await Promise.all([currentUser.save(), likedUser.save()]);
+      // Check if it's a mutual match
+      const isMutualMatch = likedUser.likes.some(
+        (id) => id.toString() === currentUserId
+      );
 
-        // Realtime notification to likedUser via webSocket
-        try {
-          const receiverSocketId = getReceiverSocketId(likedUserId.toString());
-          if (receiverSocketId) {
-            const io = getIO();
-            io.to(receiverSocketId).emit("newMatch", {
-              _id: currentUser._id,
-              name: currentUser.name,
-              image: currentUser.image,
-            });
+      if (isMutualMatch) {
+        const alreadyMatched = currentUser.matches.some(
+          (id) => id.toString() === likedUserId
+        );
+
+        if (!alreadyMatched) {
+          currentUser.matches.push(likedUserId);
+          likedUser.matches.push(currentUser._id);
+
+          await Promise.all([currentUser.save(), likedUser.save()]);
+
+          // Realtime notification to likedUser via webSocket
+          try {
+            const receiverSocketId = getReceiverSocketId(likedUserId);
+            if (receiverSocketId) {
+              const io = getIO();
+              io.to(receiverSocketId).emit("newMatch", {
+                _id: currentUser._id,
+                name: currentUser.name,
+                image: currentUser.image,
+              });
+            }
+          } catch (socketError) {
+            console.log("Socket emit error on match:", socketError.message);
           }
-        } catch (socketError) {
-          console.log("Socket emit error on match:", socketError.message);
+        } else {
+          await currentUser.save();
         }
+      } else {
+        await currentUser.save();
       }
     }
+
     return res.status(200).json({
       success: true,
       user: currentUser,
     });
   } catch (error) {
-    console.log(error);
+    console.error("Error in swipeRight:", error);
     res.status(500).json({ success: false, message: "Internal server error" });
   }
 };
@@ -49,39 +77,53 @@ export const swipeRight = async (req, res) => {
 export const swipeLeft = async (req, res) => {
   try {
     const { dislikedUserId } = req.params;
-    const currentUser = await User.findById(req.user._id).select("-password");
+    const currentUserId = req.user._id.toString();
+
+    const currentUser = await User.findById(currentUserId).select("-password");
     if (!currentUser) {
       return res
         .status(404)
         .json({ success: false, message: "User not found" });
     }
-    if (!currentUser.dislikes.includes(dislikedUserId)) {
+
+    const alreadyDisliked = currentUser.dislikes.some(
+      (id) => id.toString() === dislikedUserId
+    );
+
+    if (!alreadyDisliked) {
       currentUser.dislikes.push(dislikedUserId);
       await currentUser.save();
     }
+
     return res.status(200).json({ success: true, user: currentUser });
   } catch (error) {
-    console.log(error);
+    console.error("Error in swipeLeft:", error);
     res.status(500).json({ success: false, message: "Internal server error" });
   }
 };
 
 export const getMatches = async (req, res) => {
   try {
-    const user = await User.findById(req.user._id).populate(
-      "matches",
-      "name image",
-    );
-    return res.status(200).json({ success: true, matches: user.matches });
+    const user = await User.findById(req.user._id)
+      .populate("matches", "name image")
+      .lean();
+
+    if (!user) {
+      return res
+        .status(404)
+        .json({ success: false, message: "User not found" });
+    }
+
+    return res.status(200).json({ success: true, matches: user.matches || [] });
   } catch (error) {
-    console.log(error);
+    console.error("Error in getMatches:", error);
     res.status(500).json({ success: false, message: "Internal server error" });
   }
 };
 
 export const getUserProfiles = async (req, res) => {
   try {
-    const currentUser = await User.findById(req.user._id);
+    const currentUser = await User.findById(req.user._id).lean();
 
     if (!currentUser) {
       return res
@@ -92,9 +134,9 @@ export const getUserProfiles = async (req, res) => {
     const users = await User.find({
       $and: [
         { _id: { $ne: currentUser._id } },
-        { _id: { $nin: currentUser.likes } },
-        { _id: { $nin: currentUser.dislikes } },
-        { _id: { $nin: currentUser.matches } },
+        { _id: { $nin: currentUser.likes || [] } },
+        { _id: { $nin: currentUser.dislikes || [] } },
+        { _id: { $nin: currentUser.matches || [] } },
         {
           gender:
             currentUser.genderPreference === "both"
@@ -103,11 +145,15 @@ export const getUserProfiles = async (req, res) => {
         },
         { genderPreference: { $in: [currentUser.gender, "both"] } },
       ],
-    }).select("-password");
+    })
+      .select("-password")
+      .limit(50)
+      .lean();
 
     return res.status(200).json({ success: true, users });
   } catch (error) {
-    console.log(error);
+    console.error("Error in getUserProfiles:", error);
     res.status(500).json({ success: false, message: "Internal server error" });
   }
 };
+

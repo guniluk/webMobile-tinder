@@ -79,7 +79,11 @@ export const useMatchStore = create((set, get) => ({
       set({ swipeFeedback: "like" });
       const res = await axiosInstance.post(`/matches/swipe-right/${user._id}`);
 
-      const isMatch = res.data.user?.matches?.includes(user._id);
+      const userMatches = res.data.user?.matches || [];
+      const isMatch = userMatches.some(
+        (id) => (typeof id === "object" ? id._id : id).toString() === user._id.toString()
+      );
+
       if (isMatch) {
         toast.success(`🎉 ${user.name}님과 매치되었습니다!`, {
           icon: "💖",
@@ -98,4 +102,5 @@ export const useMatchStore = create((set, get) => ({
       setTimeout(() => set({ swipeFeedback: null }), 300);
     }
   },
+
 }));

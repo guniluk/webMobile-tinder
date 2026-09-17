@@ -16,12 +16,9 @@ export const useAuthStore = create((set, get) => ({
     const socket = initializeSocket(user._id);
     set({ socket });
 
+    socket.off("getOnlineUsers");
     socket.on("getOnlineUsers", (users) => {
       set({ onlineUsers: users });
-    });
-
-    socket.on("newMatch", (match) => {
-      console.log("🎉 New Match!:", match);
     });
   },
 
@@ -29,6 +26,7 @@ export const useAuthStore = create((set, get) => ({
     disconnectSocket();
     set({ socket: null, onlineUsers: [] });
   },
+
 
   signup: async (signupData) => {
     try {

@@ -1,5 +1,5 @@
 import { ArrowLeft, User as UserIcon } from "lucide-react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "../../store/useAuthStore";
 
 const ChatHeader = ({ matchUser }) => {

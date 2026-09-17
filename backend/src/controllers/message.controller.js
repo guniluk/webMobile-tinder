@@ -53,7 +53,9 @@ export const getConversation = async (req, res) => {
 
     const conversation = await Conversation.findOne({
       participants: { $all: [userId, otherUserId] },
-    }).populate("participants", "name email image");
+    })
+      .populate("participants", "name email image")
+      .lean();
 
     if (!conversation) {
       return res.status(200).json({ conversation: null, messages: [] });
@@ -63,11 +65,13 @@ export const getConversation = async (req, res) => {
       conversationId: conversation._id,
     })
       .sort({ createdAt: 1 })
-      .populate("senderId", "name email image");
+      .populate("senderId", "name email image")
+      .lean();
 
     res.status(200).json({ conversation, messages });
   } catch (error) {
-    console.log("Error in getConversation controller", error);
+    console.error("Error in getConversation controller:", error);
     res.status(500).json({ message: "Internal Server Error" });
   }
 };
+

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Send, Heart, Smile } from "lucide-react";
+import { Send } from "lucide-react";
 
 const QUICK_EMOJIS = ["👋", "💖", "✨", "😊", "🔥"];
 
