@@ -224,7 +224,7 @@ erDiagram
 ### 2) 저장소 클론 및 패키지 설치
 ```bash
 # 1. 저장소 복제
-git clone https://github.com/guniluk/webMobile-tinder.git
+git clone https://github.com/your-username/webMobile-tinder.git
 cd webMobile-tinder
 
 # 2. 백엔드 및 프론트엔드 의존성 일괄 설치
@@ -240,7 +240,7 @@ NODE_ENV=development
 DEVELOPMENT_URL=http://localhost:5173
 
 # MongoDB Atlas 연결 문자열
-MONGO_URI=mongodb+srv://<username>:<password>@cluster0.xxx.mongodb.net/tinder_db?retryWrites=true&w=majority
+MONGO_URI=mongodb+srv://<username>:<password>@your-cluster.mongodb.net/tinder_db?retryWrites=true&w=majority
 
 # JWT 비밀키
 JWT_SECRET=your_jwt_secret_key_here
@@ -277,9 +277,10 @@ npm run dev:frontend
 3. **14분 Cron Keep-Alive**:
    - Render 무료 티어의 15분 비활성 슬립 문제를 방지하기 위해 백엔드에 14분 주기 크론이 내장되어 있어 **24시간 빠른 응답 속도를 유지**합니다.
 
-> 📖 **더욱 자세한 단계별 배포 설명서**는 루트 폴더의 **[render.md](file:///Users/guniluk/Desktop/CODING/webMobile-tinder/render.md)** 파일을 참고해주세요.
+> 📖 **더욱 자세한 단계별 배포 설명서**는 루트 폴더의 **[render.md](./render.md)** 파일을 참고해주세요.
 
 ---
 
 ## 📄 라이선스 (License)
-This project is licensed under the [ISC License](file:///Users/guniluk/Desktop/CODING/webMobile-tinder/package.json).
+This project is licensed under the [ISC License](./package.json).
+

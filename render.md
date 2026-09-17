@@ -93,12 +93,13 @@
 |---|---|:---:|
 | `NODE_ENV` | `production` | **[필수]** 프로덕션 모드 활성화 |
 | `PORT` | `3000` | **[필수]** 서버 포트 |
-| `MONGO_URI` | `mongodb+srv://admin:pass123@cluster0.xxx.mongodb.net/tinder?retryWrites=true&w=majority` | **[필수]** MongoDB Atlas 연결 문자열 |
+| `MONGO_URI` | `mongodb+srv://<username>:<password>@your-cluster.mongodb.net/tinder?retryWrites=true&w=majority` | **[필수]** MongoDB Atlas 연결 문자열 |
 | `JWT_SECRET` | `your_custom_jwt_secret_token_key_here` | **[필수]** 로그인 인증 토큰 암호화 키 |
-| `CLOUDINARY_CLOUD_NAME` | `본인의_클라우디너리_클라우드명` | **[필수]** Cloudinary Cloud Name |
-| `CLOUDINARY_API_KEY` | `본인의_클라우디너리_API_키` | **[필수]** Cloudinary API Key |
-| `CLOUDINARY_API_SECRET` | `본인의_클라우디너리_API_시크릿` | **[필수]** Cloudinary API Secret |
-| `CLIENT_URL` | `https://webmobile-tinder.onrender.com` | *(선택)* 생성될 본인 Render 서비스 URL |
+| `CLOUDINARY_CLOUD_NAME` | `your_cloudinary_cloud_name` | **[필수]** Cloudinary Cloud Name |
+| `CLOUDINARY_API_KEY` | `your_cloudinary_api_key` | **[필수]** Cloudinary API Key |
+| `CLOUDINARY_API_SECRET` | `your_cloudinary_api_secret` | **[필수]** Cloudinary API Secret |
+| `CLIENT_URL` | `https://your-app-name.onrender.com` | *(선택)* 생성될 본인 Render 서비스 URL |
+
 
 > 💡 **안내**: `RENDER_EXTERNAL_URL` 환경 변수는 Render.com에서 배포 시 서비스 URL(예: `https://webmobile-tinder.onrender.com`)을 자동으로 주입해주므로 사용자가 직접 추가하지 않아도 됩니다.
 
