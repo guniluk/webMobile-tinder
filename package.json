@@ -18,7 +18,8 @@
     "start": "NODE_ENV=production node backend/src/server.js",
     "dev": "npm run dev --prefix backend",
     "dev:backend": "npm run dev --prefix backend",
-    "dev:frontend": "npm run dev --prefix frontend"
+    "dev:frontend": "npm run dev --prefix frontend",
+    "dev:mobile": "npm start --prefix mobile"
   }
 }
 

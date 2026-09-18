@@ -1,6 +1,7 @@
 # Dependencies
 node_modules/
 package-lock.json.backup
+.expo/
 
 # Environment Variables & Secrets (Never commit actual credentials)
 .env

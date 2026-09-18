@@ -1,84 +1,91 @@
-# ⚡ Socket.IO 실시간 통신 완벽 가이드 & 구현 정리
+# ⚡ Socket.IO 실시간 통신 완벽 가이드 (Backend, Web, Mobile)
 
-본 문서는 **Tinder 풀스택 웹 애플리케이션**에 구현된 **Socket.IO 실시간 웹소켓(WebSocket) 통신**의 아키텍처, 백엔드 및 프론트엔드 구현 코드, 동작 절차와 원리를 쉽게 정리한 가이드입니다.
+> **Socket.IO**를 활용하여 **Node.js 백엔드**, **React 웹 프론트엔드**, **React Native (Expo) 모바일 앱** 간에 실시간 양방향 통신을 구현하는 종합 개발 가이드입니다.  
+> 초보자도 쉽게 따라할 수 있도록 각 플랫폼별 **설치 ➔ 클라이언트 설정 ➔ 상태 관리(Zustand) 연동 ➔ UI 렌더링**의 단계별 절차와 실제 코드를 상세히 정리했습니다.
 
 ---
 
 ## 📌 목차
-1. [실시간 기능 개요 및 아키텍처](#1-실시간-기능-개요-및-아키텍처)
-2. [백엔드(Backend) 구현 및 코드 분석](#2-백엔드backend-구현-및-코드-분석)
-3. [프론트엔드(Frontend) 구현 및 코드 분석](#3-프론트엔드frontend-구현-및-코드-분석)
-4. [프로젝트 내 4대 실시간 기능 동작 원리](#4-프로젝트-내-4대-실시간-기능-동작-원리)
-5. [배포(Render.com) 및 CORS 최적화](#5-배포rendercom-및-cors-최적화)
-6. [실전 동작 시나리오 예시](#6-실전-동작-시나리오-예시)
+1. [🌟 3자(Backend ↔ Web ↔ Mobile) 실시간 아키텍처](#1-3자backend--web--mobile-실시간-아키텍처)
+2. [⚙️ 1단계: 백엔드(Backend) 구현 절차 및 방법](#2-1단계-백엔드backend-구현-절차-및-방법)
+   - [Step 1: Socket.IO 패키지 설치](#step-1-socketio-패키지-설치)
+   - [Step 2: HTTP 서버와 소켓 서버 바인딩 (`server.js`)](#step-2-http-서버와-소켓-서버-바인딩-serverjs)
+   - [Step 3: 유저 매핑 및 접속 수명주기 관리 (`socket.server.js`)](#step-3-유저-매핑-및-접속-수명주기-관리-socketserverjs)
+   - [Step 4: 컨트롤러에서 실시간 이벤트 발송 (`controllers/`)](#step-4-컨트롤러에서-실시간-이벤트-발송-controllers)
+3. [🖥️ 2단계: 프론트엔드(Web) 구현 절차 및 방법](#3-2단계-프론트엔드web-구현-절차-및-방법)
+   - [Step 1: Socket.IO Client 설치](#step-1-socketio-client-설치)
+   - [Step 2: 소켓 싱글톤 클라이언트 생성 (`socket.client.js`)](#step-2-소켓-싱글톤-클라이언트-생성-socketclientjs)
+   - [Step 3: Zustand 스토어와 소켓 연결 (`useAuthStore.js`)](#step-3-zustand-스토어와-소켓-연결-useauthstorejs)
+   - [Step 4: 실시간 메시지 & 안 읽은 비행기(✈️) 뱃지 구현](#step-4-실시간-메시지--안-읽은-비행기-뱃지-구현)
+4. [📱 3단계: 모바일(Expo / Mobile) 구현 절차 및 방법](#4-3단계-모바일expo--mobile-구현-절차-및-방법)
+   - [Step 1: 모바일 클라이언트 패키지 설치](#step-1-모바일-클라이언트-패키지-설치)
+   - [Step 2: LAN IP 자동 감지형 소켓 클라이언트 (`lib/socket.js`)](#step-2-lan-ip-자동-감지형-소켓-클라이언트-libsocketjs)
+   - [Step 3: 모바일 인증 스토어와 소켓 라이프사이클 (`store/useAuthStore.js`)](#step-3-모바일-인증-스토어와-소켓-라이프사이클-storeuseauthstorejs)
+   - [Step 4: 전역 탭 레이아웃에서 소켓 구독 (`(tabs)/_layout.jsx`)](#step-4-전역-탭-레이아웃에서-소켓-구독-tabs_layoutjsx)
+   - [Step 5: 모바일 4대 실시간 컴포넌트 구현 (모달, 토스트, 뱃지, 대화방)](#step-5-모바일-4대-실시간-컴포넌트-구현-모달-토스트-뱃지-대화방)
+5. [🌐 Web ↔ Mobile 크로스 플랫폼 실전 동작 시나리오](#5-web--mobile-크로스-플랫폼-실전-동작-시나리오)
+6. [🔧 트러블슈팅 및 필수 주의사항](#6-트러블슈팅-및-필수-주의사항)
 
 ---
 
-## 1. 실시간 기능 개요 및 아키텍처
+## 1. 🌟 3자(Backend ↔ Web ↔ Mobile) 실시간 아키텍처
 
-### 🎯 구현된 4대 핵심 실시간 기능
-1. **실시간 온라인/오프라인 상태 감지 (Online Status)**
-   - 유저가 접속하거나 창을 닫으면 실시간으로 온라인 유저 목록을 모든 클라이언트에 브로드캐스트.
-2. **1:1 실시간 채팅 메시지 송수신 (Real-time Chatting)**
-   - 메시지 전송 시 새로고침 없이 수신자 화면에 말풍선이 즉시 렌더링되고 최하단으로 자동 스크롤.
-3. **새로운 메시지 알림 & 사이드바 비행기 아이콘 (Unread Badge)**
-   - 채팅방 밖(홈, 프로필, 타 대화방 등)에 있을 때 메시지를 받으면 사이드바 아바타와 이름 옆에 **비행기(✈️) 아이콘**과 뱃지가 깜빡이며 표시되고, 채팅방에 진입하면 즉시 해제.
-4. **실시간 상호 매치 성사 알림 (New Match Notification)**
-   - 상대방이 나에게 '좋아요'를 눌러 매치가 성사되면 실시간으로 토스트 팝업(`🎉 매치되었습니다!`)과 함께 매칭 목록이 즉시 동기화.
+하나의 Socket.IO 서버가 웹과 모바일의 접속을 모두 수용하며, 클라이언트의 플랫폼에 상관없이 `userId`를 기반으로 타겟팅 전송 및 전체 브로드캐스트를 수행합니다.
 
----
-
-### 🔄 전체 실시간 통신 흐름도
-
-```mermaid
-sequenceDiagram
-    autonumber
-    actor A as 사용자 A (로그인)
-    participant C as 프론트엔드 (Zustand & Socket Client)
-    participant S as 백엔드 서버 (Express & Socket.IO)
-    actor B as 사용자 B (수신자)
-
-    %% 1. 연결 단계
-    A->>C: 로그인 성공 (user: A)
-    C->>S: 1. Handshake 요청: io("URL", { query: { userId: "A" } })
-    S-->>S: userSocketMap["A"] = socketA.id 등록
-    S->>C: 2. io.emit("getOnlineUsers", ["A", "B", ...]) 브로드캐스트
-    Note over C: Sidebar 및 Header에 초록색 온라인 뱃지 즉시 표시
-
-    %% 2. 메시지 전송 단계
-    A->>C: 메시지 입력 및 전송 ("안녕하세요!")
-    C->>S: POST /api/messages/send (content, receiverId: "B")
-    S-->>S: DB에 메시지 저장 (MongoDB)
-    S-->>S: getReceiverSocketId("B")로 B의 socket.id 조회
-    S->>B: 3. io.to(socketB.id).emit("newMessage", messageData)
-    
-    alt B가 A와의 채팅방에 있는 경우
-        Note over B: MessageList에 즉시 말풍선 추가 및 스크롤
-    else B가 다른 페이지에 있는 경우
-        Note over B: 사이드바 A의 프로필에 비행기(✈️) 아이콘 뱃지 표시
-    end
+```
+                         ┌──────────────────────────────┐
+                         │   Node.js Socket.IO Server   │
+                         │ userSocketMap: { userId: id }│
+                         └──────────────┬───────────────┘
+                                        │
+             ┌──────────────────────────┴──────────────────────────┐
+             │ io.emit("getOnlineUsers")                           │
+             │ io.to(targetSocketId).emit("newMessage")            │
+             │ io.to(targetSocketId).emit("newMatch")              │
+             │ io.emit("newUserRegistered")                        │
+             ▼                                                     ▼
+┌─────────────────────────┐                               ┌─────────────────────────┐
+│     🖥️ Web Frontend     │ ◀─── Cross-Platform ───▶ │      📱 Mobile App      │
+│  (React 19 + Zustand)   │      Realtime Chat    │   (Expo SDK 57 + Zustand│
+│  • 초록색 온라인 점     │                       │  • 상단 실시간 접속자 수│
+│  • 비행기(✈️) 읽지않음  │                       │  • 상단 인앱 토스트 알림│
+│  • 실시간 매치 팝업     │                       │  • 전신 매칭 축하 모달  │
+└─────────────────────────┘                               └─────────────────────────┘
 ```
 
 ---
 
-## 2. 백엔드(Backend) 구현 및 코드 분석
+## 2. ⚙️ 1단계: 백엔드(Backend) 구현 절차 및 방법
 
-### 📁 1) 서버 진입점 및 HTTP/Socket 바인딩 (`backend/src/server.js`)
-Express 인스턴스와 Node.js의 `httpServer`를 결합하여 동일한 포트에서 HTTP API와 WebSocket을 함께 처리합니다.
+---
+
+### Step 1: Socket.IO 패키지 설치
+백엔드 디렉토리(`backend/`)에서 `socket.io` 패키지를 설치합니다.
+
+```bash
+cd backend
+npm install socket.io
+```
+
+---
+
+### Step 2: HTTP 서버와 소켓 서버 바인딩 (`backend/src/server.js`)
+Express 앱과 Node.js 기본 `httpServer`를 결합하여 동일한 포트(예: 3000)에서 REST API와 WebSocket 프로토콜을 동시에 수신합니다.
 
 ```javascript
 import express from "express";
 import { createServer } from "http";
+import cors from "cors";
 import { initializeSocket } from "./socket/socket.server.js";
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// 1. HTTP 서버 생성 및 Socket.IO 초기화 바인딩
+// 1. Node.js HTTP 서버 생성 및 Socket.IO 바인딩
 const httpServer = createServer(app);
 initializeSocket(httpServer);
 
-// 2. CORS 설정 (개발환경 및 프로덕션 동적 대응)
+// 2. CORS 설정 (웹 브라우저 및 모바일 접속 허용)
 app.use(
   cors({
     origin:
@@ -89,31 +96,28 @@ app.use(
   }),
 );
 
-// 3. app.listen() 대신 httpServer.listen() 사용 (WebSocket 요청 수신 필수)
-connDB().then(() => {
-  httpServer.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
-  });
+// 3. 반드시 app.listen() 대신 httpServer.listen()을 사용해야 소켓 요청을 받습니다!
+httpServer.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
 });
 ```
 
 ---
 
-### 📁 2) Socket.IO 서버 핵심 로직 (`backend/src/socket/socket.server.js`)
-접속한 유저의 식별자(`userId`)와 `socket.id`를 매핑하고 연결 수명 주기를 관리합니다.
+### Step 3: 유저 매핑 및 접속 수명주기 관리 (`backend/src/socket/socket.server.js`)
+어떤 사용자가 어떤 소켓 ID로 연결되어 있는지 기록하는 `userSocketMap`을 관리합니다.
 
 ```javascript
 import { Server } from "socket.io";
 
 let io;
 
-// 접속 중인 유저 맵: { [userId]: socketId }
+// 유저 ID ➔ 소켓 ID 매핑 객체 { "65f123...": "socket_abc123" }
 const userSocketMap = {};
 
-// 특정 유저의 소켓 ID를 찾는 헬퍼 함수
+// 특정 유저의 socket.id를 찾는 헬퍼 함수
 export const getReceiverSocketId = (userId) => userSocketMap[userId];
 
-// Socket.IO 인스턴스 반환 함수
 export const getIO = () => {
   if (!io) throw new Error("Socket.IO is not initialized!");
   return io;
@@ -131,25 +135,24 @@ export const initializeSocket = (httpServer) => {
   });
 
   io.on("connection", (socket) => {
-    // 1. Handshake 쿼리에서 userId 추출
+    // 1. 클라이언트가 연결할 때 쿼리로 전달한 userId 추출
     const userId = socket.handshake.query.userId;
-    console.log(`⚡ Socket connected: ${socket.id} (User ID: ${userId || "Anonymous"})`);
+    console.log(`⚡ Socket connected: ${socket.id} (User: ${userId || "Anonymous"})`);
 
-    // 2. 유저 매핑 등록
+    // 2. 유효한 유저인 경우 맵에 등록
     if (userId && userId !== "undefined") {
       userSocketMap[userId] = socket.id;
     }
 
-    // 3. 전체 유저에게 현재 온라인 목록 브로드캐스트
+    // 3. 현재 접속 중인 전체 유저 ID 목록을 모든 클라이언트에 브로드캐스트
     io.emit("getOnlineUsers", Object.keys(userSocketMap));
 
-    // 4. 연결 해제 시 처리 (다중 탭 고려 검증)
+    // 4. 연결 종료 시 매핑에서 제거하고 온라인 목록 다시 브로드캐스트
     socket.on("disconnect", () => {
       console.log(`❌ Socket disconnected: ${socket.id}`);
-      if (userId && userId !== "undefined" && userSocketMap[userId] === socket.id) {
+      if (userId && userSocketMap[userId] === socket.id) {
         delete userSocketMap[userId];
       }
-      // 갱신된 온라인 유저 목록 전송
       io.emit("getOnlineUsers", Object.keys(userSocketMap));
     });
   });
@@ -160,17 +163,20 @@ export const initializeSocket = (httpServer) => {
 
 ---
 
-### 📁 3) 컨트롤러에서의 실시간 이벤트 발송
+### Step 4: 컨트롤러에서 실시간 이벤트 발송 (`controllers/`)
 
-#### ① 메시지 전송 시 (`backend/src/controllers/message.controller.js`)
+#### ① 메시지 전송 시 (`message.controller.js`)
 ```javascript
 import { getReceiverSocketId, getIO } from "../socket/socket.server.js";
 
 export const sendMessage = async (req, res) => {
-  // DB에 메시지 생성
+  const { content, receiverId } = req.body;
+  const senderId = req.user._id;
+
+  // DB에 메시지 저장
   const newMessage = await Message.create({ senderId, receiverId, content, conversationId });
 
-  // 수신자가 온라인 상태이면 실시간 소켓 전송
+  // 수신자가 현재 온라인이면 실시간으로 메시지 전송!
   try {
     const receiverSocketId = getReceiverSocketId(receiverId.toString());
     if (receiverSocketId) {
@@ -181,11 +187,11 @@ export const sendMessage = async (req, res) => {
     console.log("Socket emit error:", socketError.message);
   }
 
-  res.status(201).json({ message: "Message sent successfully", newMessage });
+  res.status(201).json({ success: true, newMessage });
 };
 ```
 
-#### ② 상호 매칭 성사 시 (`backend/src/controllers/match.controller.js`)
+#### ② 상호 매칭 성사 시 (`match.controller.js`)
 ```javascript
 import { getReceiverSocketId, getIO } from "../socket/socket.server.js";
 
@@ -195,7 +201,7 @@ if (likedUser.likes.includes(currentUser._id)) {
   likedUser.matches.push(currentUser._id);
   await Promise.all([currentUser.save(), likedUser.save()]);
 
-  // 상대방이 접속 중이면 실시간 newMatch 이벤트 발송
+  // 상대방에게 즉시 newMatch 이벤트 전송
   try {
     const receiverSocketId = getReceiverSocketId(likedUserId.toString());
     if (receiverSocketId) {
@@ -206,17 +212,44 @@ if (likedUser.likes.includes(currentUser._id)) {
         image: currentUser.image,
       });
     }
-  } catch (socketError) {
-    console.log("Socket emit error on match:", socketError.message);
+  } catch (err) {
+    console.log("Socket match emit error:", err.message);
   }
 }
 ```
 
+#### ③ 신규 회원가입 시 (`auth.controller.js`)
+```javascript
+// 새로운 유저가 가입하면 모든 클라이언트의 디스커버 스택 실시간 갱신
+try {
+  const io = getIO();
+  io.emit("newUserRegistered", {
+    _id: newUser._id,
+    name: newUser.name,
+    gender: newUser.gender,
+  });
+} catch (err) {}
+```
+
 ---
 
-## 3. 프론트엔드(Frontend) 구현 및 코드 분석
+## 3. 🖥️ 2단계: 프론트엔드(Web) 구현 절차 및 방법
 
-### 📁 1) 소켓 클라이언트 싱글톤 인스턴스 (`frontend/src/socket/socket.client.js`)
+---
+
+### Step 1: Socket.IO Client 설치
+웹 디렉토리(`frontend/`)에서 클라이언트 라이브러리를 설치합니다.
+
+```bash
+cd frontend
+npm install socket.io-client
+```
+
+---
+
+### Step 2: 소켓 싱글톤 클라이언트 생성 (`frontend/src/socket/socket.client.js`)
+중복 연결을 방지하고 한 번 연결된 소켓 인스턴스를 전역에서 재사용할 수 있도록 관리합니다.
+
 ```javascript
 import { io } from "socket.io-client";
 
@@ -235,10 +268,6 @@ export const initializeSocket = (userId) => {
   socket = io(SOCKET_URL, {
     query: { userId },
     withCredentials: true,
-    autoConnect: true,
-    reconnection: true,
-    reconnectionAttempts: 5,
-    reconnectionDelay: 1000,
     transports: ["websocket", "polling"],
   });
 
@@ -257,10 +286,13 @@ export const disconnectSocket = () => {
 
 ---
 
-### 📁 2) 인증 상태와 소켓 라이프사이클 연동 (`frontend/src/store/useAuthStore.js`)
-로그인/인증 확인 시 자동으로 소켓을 연결하고, `getOnlineUsers`를 구독하여 `onlineUsers` 배열을 실시간 유지합니다.
+### Step 3: Zustand 스토어와 소켓 연결 (`frontend/src/store/useAuthStore.js`)
+로그인하거나 세션이 확인(`checkAuth`)되면 자동으로 소켓을 연결하고, `getOnlineUsers`를 구독합니다.
 
 ```javascript
+import { create } from "zustand";
+import { initializeSocket, disconnectSocket } from "../socket/socket.client";
+
 export const useAuthStore = create((set, get) => ({
   user: null,
   isAuthenticated: false,
@@ -274,6 +306,7 @@ export const useAuthStore = create((set, get) => ({
     const socket = initializeSocket(user._id);
     set({ socket });
 
+    // 실시간 온라인 접속자 목록 갱신
     socket.on("getOnlineUsers", (users) => {
       set({ onlineUsers: users });
     });
@@ -285,37 +318,31 @@ export const useAuthStore = create((set, get) => ({
   },
 
   login: async (email, password) => {
-    const response = await axiosInstance.post("/auth/login", { email, password });
-    set({ user: response.data, isAuthenticated: true });
-    get().connectSocket(); // 소켓 자동 연결
+    const res = await axiosInstance.post("/auth/login", { email, password });
+    set({ user: res.data, isAuthenticated: true });
+    get().connectSocket(); // 로그인 즉시 소켓 연결!
   },
 
   logout: async () => {
     await axiosInstance.post("/auth/logout");
-    get().disconnectSocket(); // 소켓 자동 해제
+    get().disconnectSocket(); // 로그아웃 시 소켓 정리!
     set({ user: null, isAuthenticated: false });
-  },
-
-  checkAuth: async () => {
-    const response = await axiosInstance.get("/auth/me");
-    set({ user: response.data.user, isAuthenticated: true });
-    get().connectSocket(); // 새로고침 시 세션 유지 & 소켓 재연결
   },
 }));
 ```
 
 ---
 
-### 📁 3) 전역 메시지 및 안 읽은 메시지(비행기 아이콘) 상태 관리 (`frontend/src/store/useMessageStore.js`)
+### Step 4: 실시간 메시지 & 안 읽은 비행기(✈️) 뱃지 구현 (`useMessageStore.js`)
 ```javascript
 export const useMessageStore = create((set, get) => ({
   messages: [],
-  unreadSenders: [],       // 안 읽은 메시지를 보낸 유저 ID 목록
-  activeChatUserId: null,  // 현재 열려있는 대화방 상대방 ID
+  unreadSenders: [],       // 안 읽은 메시지가 도착한 유저 ID 목록
+  activeChatUserId: null,  // 현재 대화방에서 바라보고 있는 상대방 ID
 
   setActiveChatUserId: (userId) => {
     set({ activeChatUserId: userId });
-    if (userId) get().markAsRead(userId);
+    if (userId) get().markAsRead(userId); // 대화방 입장 시 뱃지 제거
   },
 
   markAsRead: (userId) => {
@@ -331,21 +358,16 @@ export const useMessageStore = create((set, get) => ({
     socket.off("newMessage");
     socket.on("newMessage", (newMessage) => {
       const senderId = typeof newMessage.senderId === "object" ? newMessage.senderId._id : newMessage.senderId;
-
-      // 내가 보낸 메시지 무시
-      if (useAuthStore.getState().user?._id === senderId) return;
-
       const { activeChatUserId, unreadSenders } = get();
 
-      // 현재 해당 상대와의 대화방을 보고 있는 경우 -> 즉시 메시지 렌더링
-      if (activeChatUserId && activeChatUserId === senderId) {
+      // 현재 그 유저와의 채팅방을 보고 있는 중이면 말풍선 추가
+      if (activeChatUserId === senderId) {
         set((state) => ({ messages: [...state.messages, newMessage] }));
       } else {
-        // 다른 화면에 있는 경우 -> 비행기 아이콘 표시 목록에 추가 & 토스트 팝업
+        // 다른 페이지나 다른 대화방에 있으면 사이드바에 비행기(✈️) 뱃지 추가!
         if (!unreadSenders.includes(senderId)) {
           set({ unreadSenders: [...unreadSenders, senderId] });
         }
-        toast("✈️ 새로운 메시지가 도착했습니다!", { duration: 3000 });
       }
     });
   },
@@ -354,90 +376,298 @@ export const useMessageStore = create((set, get) => ({
 
 ---
 
-## 4. 프로젝트 내 4대 실시간 기능 동작 원리
+## 4. 📱 3단계: 모바일(Expo / Mobile) 구현 절차 및 방법
 
-### 1) 🟢 실시간 온라인 상태 표시 UI (`Sidebar.jsx` & `ChatHeader.jsx`)
-```jsx
-// 1. 매칭 상대가 온라인 목록(onlineUsers)에 있는지 검사
-const isOnline = onlineUsers.includes(match._id);
+모바일 앱은 스마트폰 실물 기기의 Wi-Fi 환경과 AsyncStorage를 고려하여 구성합니다.
 
-// 2. 초록색 핑(Ping) 펄스 뱃지 렌더링
-{isOnline ? (
-  <span className="absolute -bottom-0.5 -right-0.5 flex h-3.5 w-3.5">
-    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-    <span className="relative inline-flex rounded-full h-3.5 w-3.5 bg-emerald-500 border-2 border-white shadow-xs"></span>
-  </span>
-) : (
-  <span className="absolute -bottom-0.5 -right-0.5 inline-flex rounded-full h-3.5 w-3.5 bg-gray-300 border-2 border-white shadow-xs"></span>
-)}
+---
+
+### Step 1: 모바일 클라이언트 패키지 설치
+모바일 디렉토리(`mobile/`)에서 `socket.io-client`를 설치합니다.
+
+```bash
+cd mobile
+npm install socket.io-client
 ```
 
 ---
 
-### 2) ✈️ 안 읽은 메시지 비행기 아이콘 표시 UI (`Sidebar.jsx`)
-```jsx
-// 1. 해당 유저가 unreadSenders에 포함되어 있는지 검사
-const hasUnread = unreadSenders.includes(match._id);
+### Step 2: LAN IP 자동 감지형 소켓 클라이언트 (`mobile/src/lib/socket.js`)
+스마트폰이 개발자 PC의 백엔드 주소를 스스로 찾아 연결하도록 `theme.js`의 자동 주소 해석기를 결합합니다.
 
-// 2. 아바타 좌측 상단 통통 튀는 바운스 비행기 아이콘 렌더링
-{hasUnread && (
-  <div className="absolute -top-1 -left-1 w-5 h-5 rounded-full bg-linear-to-tr from-pink-500 to-rose-600 text-white flex items-center justify-center shadow-md animate-bounce">
-    <Send className="w-2.5 h-2.5 fill-white text-white rotate-45 translate-x-[-0.5px] translate-y-[-0.5px]" />
-  </div>
-)}
-
-// 3. 이름 옆 '새 메시지' 뱃지 렌더링
-{hasUnread && (
-  <span className="inline-flex items-center gap-1 text-[10px] font-bold text-rose-600 bg-white px-1.5 py-0.5 rounded-full border border-rose-200 shadow-xs shrink-0">
-    <Send className="w-2.5 h-2.5 fill-rose-500 text-rose-500 rotate-45" />
-    새 메시지
-  </span>
-)}
-```
-
----
-
-### 3) 💖 실시간 상호 매치 알림 (`useMatchStore.js` & `App.jsx`)
 ```javascript
-// App.jsx에서 소켓 연결 시 자동 구독
-socket.on("newMatch", (newMatchUser) => {
-  toast.success(`🎉 ${newMatchUser.name}님과 새로운 매치가 성사되었습니다!`, {
-    icon: "💖",
-    duration: 5000,
+import { io } from "socket.io-client";
+import { getSocketUrl } from "../constants/theme";
+
+let socket = null;
+
+export const initializeSocket = (userId, token) => {
+  if (socket) {
+    if (socket.connected) return socket;
+    socket.disconnect();
+  }
+
+  // 🌐 자동으로 PC의 LAN IP (예: http://192.168.0.15:3000)를 감지하여 연결!
+  const socketUrl = getSocketUrl();
+  console.log("⚡ [Tinder Mobile] Connecting Socket to:", socketUrl);
+
+  socket = io(socketUrl, {
+    query: { userId, token },
+    transports: ["websocket", "polling"],
+    autoConnect: true,
+    reconnection: true,
+    reconnectionAttempts: 10,
+    reconnectionDelay: 1000,
   });
-  getMyMatches(); // 사이드바 매칭 목록 자동 새로고침
-});
+
+  return socket;
+};
+
+export const getSocket = () => socket;
+
+export const disconnectSocket = () => {
+  if (socket) {
+    socket.disconnect();
+    socket = null;
+  }
+};
 ```
 
 ---
 
-## 5. 배포(Render.com) 및 CORS 최적화
-
-백엔드와 프론트엔드를 Render.com에 단일 서비스(Monolith)로 묶어서 배포할 때:
-- 브라우저가 보는 출처와 API/웹소켓 출처가 동일한 **Same-Origin** 환경이 됩니다.
-- `.env`에 `CLIENT_URL`을 적지 않아도 동작하도록 `process.env.CLIENT_URL || true` 패턴을 적용했습니다.
+### Step 3: 모바일 인증 스토어와 소켓 라이프사이클 (`store/useAuthStore.js`)
+`AsyncStorage`에서 토큰을 불러올 때 소켓을 함께 연결합니다.
 
 ```javascript
-cors: {
-  origin:
-    process.env.NODE_ENV === "production"
-      ? process.env.CLIENT_URL || true // 배포 시 도메인 자동 허용
-      : ["http://localhost:5173", "http://localhost:3000", process.env.DEVELOPMENT_URL].filter(Boolean),
-  credentials: true,
+import { create } from "zustand";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { initializeSocket, disconnectSocket } from "../lib/socket";
+
+export const useAuthStore = create((set, get) => ({
+  user: null,
+  token: null,
+  isAuthenticated: false,
+  onlineUsers: [],
+
+  connectSocket: (userId, token) => {
+    if (!userId) return;
+    const socket = initializeSocket(userId, token);
+
+    socket.on("getOnlineUsers", (users) => {
+      set({ onlineUsers: users });
+    });
+  },
+
+  checkAuth: async () => {
+    const token = await AsyncStorage.getItem("tinder_jwt_token");
+    if (!token) return;
+    
+    const res = await api.get("/auth/me");
+    set({ user: res.data.user, token, isAuthenticated: true });
+    get().connectSocket(res.data.user._id, token);
+  },
+
+  logout: async () => {
+    await AsyncStorage.removeItem("tinder_jwt_token");
+    disconnectSocket();
+    set({ user: null, token: null, isAuthenticated: false, onlineUsers: [] });
+  },
+}));
+```
+
+---
+
+### Step 4: 전역 탭 레이아웃에서 소켓 구독 (`mobile/src/app/(tabs)/_layout.jsx`)
+사용자가 로그인되어 메인 탭바에 진입하면 전역 소켓 리스너를 한 번만 마운트합니다.
+
+```jsx
+export default function TabLayout() {
+  const { isAuthenticated } = useAuthStore();
+  const { unreadSenders, subscribeToGlobalMessages, unsubscribeFromGlobalMessages } = useMessageStore();
+  const { subscribeToNewMatches, unsubscribeFromNewMatches } = useMatchStore();
+
+  const unreadCount = unreadSenders.length;
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      subscribeToNewMatches();        // 💖 실시간 매치 구독
+      subscribeToGlobalMessages();   // 💬 실시간 메시지 구독
+    }
+
+    return () => {
+      unsubscribeFromNewMatches();
+      unsubscribeFromGlobalMessages();
+    };
+  }, [isAuthenticated]);
+
+  return (
+    <>
+      <Tabs screenOptions={{ headerShown: false }}>
+        <Tabs.Screen name="index" options={{ title: "디스커버" }} />
+        <Tabs.Screen
+          name="matches"
+          options={{
+            title: "매치 & 채팅",
+            tabBarIcon: ({ color, size }) => (
+              <View>
+                <MessageCircleHeart size={size} color={color} />
+                {/* 🔴 실시간 안 읽은 메시지 숫자 배지 */}
+                {unreadCount > 0 && (
+                  <View className="absolute -top-1 -right-2 w-4 h-4 rounded-full bg-rose-500 items-center justify-center">
+                    <Text className="text-white text-[9px] font-bold">
+                      {unreadCount > 9 ? "9+" : unreadCount}
+                    </Text>
+                  </View>
+                )}
+              </View>
+            ),
+          }}
+        />
+        <Tabs.Screen name="profile" options={{ title: "프로필" }} />
+      </Tabs>
+
+      {/* 🌟 전역 실시간 매치 축하 모달 & 메시지 토스트 */}
+      <MatchModal />
+      <MessageToast />
+    </>
+  );
 }
 ```
 
 ---
 
-## 6. 실전 동작 시나리오 예시
+### Step 5: 모바일 4대 실시간 컴포넌트 구현 (모달, 토스트, 뱃지, 대화방)
 
-| 단계 | 사용자 A (철수) | 사용자 B (영희) | 시스템/소켓 동작 |
-|:---:|:---|:---|:---|
-| **1** | 앱에 로그인 | 앱에 로그인 중 | 둘 다 `initializeSocket` 실행 → 서로의 사이드바에 **초록색 점(온라인)** 표시 |
-| **2** | 영희 프로필 카드를 오른쪽으로 스와이프 (Like) | 홈 화면 탐색 중 | 영희도 철수를 좋아한 상태였다면 백엔드에서 `newMatch` 이벤트 발송 → 영희 화면에 `🎉 철수님과 매치되었습니다!` 팝업 및 목록 즉시 갱신 |
-| **3** | 영희와의 채팅방에서 `"안녕하세요!"` 전송 | 홈 화면(채팅방 밖)에 머무름 | 백엔드가 영희의 `socket.id`로 `newMessage` 전송 → 영희 사이드바의 철수 프로필에 **✈️ 비행기 아이콘**과 `새 메시지` 뱃지 깜빡임 |
-| **4** | 대기 중 | 사이드바의 철수 클릭하여 채팅방 진입 | 영희의 `activeChatUserId`가 철수로 설정되면서 `markAsRead` 실행 → **비행기 아이콘 즉시 소멸** 및 실시간 대화 이어짐 |
+#### 1) 💖 전신 매치 축하 모달 (`components/MatchModal.jsx`)
+```jsx
+// useMatchStore에서 newMatch 이벤트를 받아 modalUser에 저장
+export const MatchModal = () => {
+  const { newMatchModalUser, clearNewMatchModalUser } = useMatchStore();
+  if (!newMatchModalUser) return null;
+
+  return (
+    <Modal transparent animationType="fade" visible={Boolean(newMatchModalUser)}>
+      <View className="flex-1 bg-black/80 items-center justify-center p-6">
+        <Text className="text-4xl font-black text-rose-400 italic mb-2">IT'S A MATCH!</Text>
+        <Text className="text-white text-base mb-8">{newMatchModalUser.name}님과 서로 매칭되었습니다!</Text>
+        <TouchableOpacity 
+          onPress={() => {
+            clearNewMatchModalUser();
+            router.push(`/chat/${newMatchModalUser._id}`);
+          }}
+          className="w-full py-4 bg-rose-500 rounded-2xl items-center"
+        >
+          <Text className="text-white font-bold text-base">메시지 보내기</Text>
+        </TouchableOpacity>
+      </View>
+    </Modal>
+  );
+};
+```
+
+#### 2) ✈️ 상단 인앱 메시지 알림 토스트 (`components/MessageToast.jsx`)
+```jsx
+// 다른 화면에 있을 때 새 메시지가 오면 상단에서 스프링 애니메이션으로 하강
+export const MessageToast = () => {
+  const { newMessageAlert, clearNewMessageAlert } = useMessageStore();
+  const slideAnim = useRef(new Animated.Value(-120)).current;
+
+  useEffect(() => {
+    if (newMessageAlert) {
+      Animated.spring(slideAnim, { toValue: 0, useNativeDriver: true }).start();
+      const timer = setTimeout(() => handleDismiss(), 4000);
+      return () => clearTimeout(timer);
+    }
+  }, [newMessageAlert]);
+
+  if (!newMessageAlert) return null;
+
+  return (
+    <Animated.View style={{ transform: [{ translateY: slideAnim }], position: "absolute", top: 50, left: 16, right: 16, zIndex: 9999 }}>
+      <TouchableOpacity 
+        onPress={() => {
+          handleDismiss();
+          router.push(`/chat/${newMessageAlert.senderId}`);
+        }}
+        className="bg-gray-900/95 p-3.5 rounded-2xl flex-row items-center border border-gray-700 shadow-2xl"
+      >
+        <View className="flex-1 ml-2">
+          <Text className="text-white font-bold text-sm">{newMessageAlert.senderId?.name || "새 메시지"}</Text>
+          <Text numberOfLines={1} className="text-gray-300 text-xs">{newMessageAlert.content}</Text>
+        </View>
+      </TouchableOpacity>
+    </Animated.View>
+  );
+};
+```
+
+#### 3) 🔄 신규 가입자 실시간 디스커버 스택 추가 (`useMatchStore.js`)
+```javascript
+subscribeToNewMatches: () => {
+  const socket = getSocket();
+  if (!socket) return;
+
+  // 신규 가입자 등록 소켓 수신 시 새로고침 없이 추천 카드에 즉시 추가!
+  socket.on("newUserRegistered", (newRegisteredUser) => {
+    const { userProfiles } = get();
+    const isAlreadyInList = userProfiles.some((u) => u._id === newRegisteredUser._id);
+    if (!isAlreadyInList) {
+      set({ userProfiles: [...userProfiles, newRegisteredUser] });
+    }
+  });
+}
+```
 
 ---
 
-✅ 본 프로젝트의 모든 실시간 통신 파이프라인은 견고하고 최적화된 상태로 동작합니다.
+## 5. 🌐 Web ↔ Mobile 크로스 플랫폼 실전 동작 시나리오
+
+```
+[Web 사용자 (철수)]                             [Mobile 사용자 (영희)]
+      │                                                │
+      │ 1. 웹 브라우저에서 영희 프로필 스와이프 (Like)    │
+      ├───────────────────────▶                        │
+      │ (영희도 이미 철수를 Like한 상태)                 │
+      │                                                │
+      │ 2. 백엔드에서 newMatch 이벤트 양방향 발송       │
+      │ ◀────────────────────────────────────────────▶ │
+      │ [웹: 토스트 팝업 🎉]                           │ [모바일: IT'S A MATCH 전신 모달!]
+      │                                                │
+      │ 3. 웹에서 영희에게 "안녕 모바일!" 전송           │
+      ├───────────────────────────────────────────────▶│
+      │                                                │ 4. 모바일 화면 상단에
+      │                                                │    "MessageToast" 알림 하강 ✈️
+      │                                                │ 5. 하단 탭바에 빨간색 "1" 뱃지 표시
+      │                                                │ 6. 토스트 터치 시 1:1 대화방 즉시 진입
+      │                                                │ 7. 영희가 답장하면 웹 대화창에 0초 즉각 렌더링!
+```
+
+---
+
+## 6. 🔧 트러블슈팅 및 필수 주의사항
+
+### 1. 모바일 Wi-Fi 연결 불가 (Network Error)
+- **원인**: 컴퓨터와 스마트폰이 서로 다른 Wi-Fi에 연결되어 있거나, 공유기가 내부 IP 통신을 차단하는 경우입니다.
+- **해결**: 스마트폰과 컴퓨터를 **동일한 Wi-Fi**에 연결하거나, 스마트폰의 **개인용 핫스팟**을 켜서 컴퓨터를 연결하세요.
+
+### 2. 중복 리스너 등록으로 인한 메시지 2번 수신 방지
+- **원인**: 컴포넌트가 리렌더링될 때 `socket.on("newMessage")`가 계속 중복 등록되는 현상입니다.
+- **해결**: 항상 리스너를 등록하기 전에 `socket.off("eventName")`을 호출하여 이전 리스너를 초기화하세요.
+  ```javascript
+  socket.off("newMessage");
+  socket.on("newMessage", handleNewMessage);
+  ```
+
+### 3. 대화방 입장 시 안 읽은 메시지(✈️) 즉시 해제
+- 사용자가 특정 유저와의 대화방에 진입하면 `activeChatUserId`를 상대방의 `_id`로 설정하고, `markAsRead(userId)`를 호출하여 전역 `unreadSenders` 목록에서 제거합니다.
+
+---
+
+## 📄 요약
+- **백엔드**: `httpServer`에 `socket.io`를 바인딩하고, `userSocketMap`에 유저 ID와 소켓 ID를 보관합니다.
+- **웹 프론트엔드**: React 19 + Zustand에서 `socket.client.js`를 연결하여 온라인 상태와 비행기(✈️) 뱃지를 제어합니다.
+- **모바일 앱**: Expo SDK 57에서 `lib/socket.js`를 통해 PC의 LAN IP로 자동 접속하며, 전역 `MatchModal`과 `MessageToast`로 푸시 알림 수준의 실시간 UX를 제공합니다.
+
+---
+
+✅ 본 가이드를 통해 백엔드, 웹, 모바일 3개 플랫폼의 모든 실시간 통신을 완벽하게 구축할 수 있습니다.

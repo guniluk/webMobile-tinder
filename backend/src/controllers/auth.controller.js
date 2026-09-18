@@ -1,5 +1,6 @@
 import User from "../models/user.model.js";
 import generateTokenAndSetCookie from "../utils/generateToken.js";
+import { getIO } from "../socket/socket.server.js";
 
 export const signup = async (req, res) => {
   const { name, email, password, gender, age, genderPreference } = req.body;
@@ -43,7 +44,21 @@ export const signup = async (req, res) => {
     });
     await newUser.save();
 
-    generateTokenAndSetCookie(newUser._id, res);
+    // Broadcast new user creation in real-time via Socket.IO
+    try {
+      const io = getIO();
+      io.emit("newUserRegistered", {
+        _id: newUser._id,
+        name: newUser.name,
+        gender: newUser.gender,
+        genderPreference: newUser.genderPreference,
+        age: newUser.age,
+      });
+    } catch (socketError) {
+      console.log("Socket emit error on signup:", socketError.message);
+    }
+
+    const token = generateTokenAndSetCookie(newUser._id, res);
     res.status(201).json({
       _id: newUser._id,
       name: newUser.name,
@@ -51,6 +66,7 @@ export const signup = async (req, res) => {
       gender: newUser.gender,
       age: newUser.age,
       genderPreference: newUser.genderPreference,
+      token,
     });
   } catch (error) {
     console.log(error);
@@ -72,7 +88,7 @@ export const login = async (req, res) => {
     if (!isPasswordValid) {
       return res.status(400).json({ message: "Invalid password" });
     }
-    generateTokenAndSetCookie(user._id, res);
+    const token = generateTokenAndSetCookie(user._id, res);
     res.status(200).json({
       _id: user._id,
       name: user.name,
@@ -82,6 +98,7 @@ export const login = async (req, res) => {
       bio: user.bio,
       image: user.image,
       genderPreference: user.genderPreference,
+      token,
     });
   } catch (error) {
     console.log(error);

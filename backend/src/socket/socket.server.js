@@ -32,10 +32,7 @@ export const getIO = () => {
 export const initializeSocket = (httpServer) => {
   io = new Server(httpServer, {
     cors: {
-      origin:
-        process.env.NODE_ENV === "production"
-          ? process.env.CLIENT_URL || true
-          : ["http://localhost:5173", "http://localhost:3000", process.env.DEVELOPMENT_URL].filter(Boolean),
+      origin: "*",
       credentials: true,
     },
   });

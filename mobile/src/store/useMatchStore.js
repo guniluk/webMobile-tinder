@@ -1,7 +1,6 @@
 import { create } from "zustand";
-import { axiosInstance } from "../lib/axios";
-import toast from "react-hot-toast";
-import { getSocket } from "../socket/socket.client";
+import api from "../lib/api";
+import { getSocket } from "../lib/socket";
 
 export const useMatchStore = create((set, get) => ({
   matches: [],
@@ -9,6 +8,10 @@ export const useMatchStore = create((set, get) => ({
   isLoadingMatches: false,
   isLoadingProfiles: false,
   swipeFeedback: null,
+  newMatchModalUser: null,
+
+  setNewMatchModalUser: (user) => set({ newMatchModalUser: user }),
+  clearNewMatchModalUser: () => set({ newMatchModalUser: null }),
 
   subscribeToNewMatches: () => {
     const socket = getSocket();
@@ -16,13 +19,7 @@ export const useMatchStore = create((set, get) => ({
 
     socket.off("newMatch");
     socket.on("newMatch", (newMatchUser) => {
-      toast.success(
-        `🎉 ${newMatchUser.name}님과 새로운 매치가 성사되었습니다!`,
-        {
-          icon: "💖",
-          duration: 5000,
-        },
-      );
+      set({ newMatchModalUser: newMatchUser });
       get().getMyMatches();
     });
 
@@ -44,7 +41,7 @@ export const useMatchStore = create((set, get) => ({
   getMyMatches: async () => {
     try {
       set({ isLoadingMatches: true });
-      const res = await axiosInstance.get("/matches");
+      const res = await api.get("/matches");
       set({ matches: res.data.matches || [] });
     } catch (error) {
       console.error("Error fetching matches:", error);
@@ -56,11 +53,10 @@ export const useMatchStore = create((set, get) => ({
   getUserProfiles: async () => {
     try {
       set({ isLoadingProfiles: true });
-      const res = await axiosInstance.get("/matches/user-profiles");
+      const res = await api.get("/matches/user-profiles");
       set({ userProfiles: res.data.users || [] });
     } catch (error) {
       console.error("Error fetching user profiles:", error);
-      toast.error("추천 프로필을 불러오지 못했습니다.");
     } finally {
       set({ isLoadingProfiles: false });
     }
@@ -69,13 +65,12 @@ export const useMatchStore = create((set, get) => ({
   swipeLeft: async (user) => {
     try {
       set({ swipeFeedback: "dislike" });
-      await axiosInstance.post(`/matches/swipe-left/${user._id}`);
+      await api.post(`/matches/swipe-left/${user._id}`);
       set((state) => ({
         userProfiles: state.userProfiles.filter((p) => p._id !== user._id),
       }));
     } catch (error) {
       console.error("Swipe left error:", error);
-      toast.error("요청 처리에 실패했습니다.");
     } finally {
       setTimeout(() => set({ swipeFeedback: null }), 300);
     }
@@ -84,18 +79,17 @@ export const useMatchStore = create((set, get) => ({
   swipeRight: async (user) => {
     try {
       set({ swipeFeedback: "like" });
-      const res = await axiosInstance.post(`/matches/swipe-right/${user._id}`);
+      const res = await api.post(`/matches/swipe-right/${user._id}`);
 
       const userMatches = res.data.user?.matches || [];
       const isMatch = userMatches.some(
-        (id) => (typeof id === "object" ? id._id : id).toString() === user._id.toString()
+        (id) =>
+          (typeof id === "object" ? id._id : id).toString() ===
+          user._id.toString(),
       );
 
       if (isMatch) {
-        toast.success(`🎉 ${user.name}님과 매치되었습니다!`, {
-          icon: "💖",
-          duration: 4000,
-        });
+        set({ newMatchModalUser: user });
         get().getMyMatches();
       }
 
@@ -104,10 +98,8 @@ export const useMatchStore = create((set, get) => ({
       }));
     } catch (error) {
       console.error("Swipe right error:", error);
-      toast.error("요청 처리에 실패했습니다.");
     } finally {
       setTimeout(() => set({ swipeFeedback: null }), 300);
     }
   },
-
 }));

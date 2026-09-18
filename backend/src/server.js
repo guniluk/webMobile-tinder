@@ -34,12 +34,17 @@ app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ limit: "10mb", extended: true }));
 app.use(
   cors({
-    origin:
-      process.env.NODE_ENV === "production"
-        ? process.env.CLIENT_URL || true
-        : [process.env.DEVELOPMENT_URL, "http://localhost:5173"].filter(
-            Boolean,
-          ),
+    origin: (origin, callback) => {
+      // Allow requests with no origin (like mobile apps, curl, Postman)
+      if (!origin) return callback(null, true);
+      if (process.env.NODE_ENV === "production") {
+        if (process.env.CLIENT_URL && origin === process.env.CLIENT_URL) {
+          return callback(null, true);
+        }
+        return callback(null, true); // Allow all configured origins in production
+      }
+      return callback(null, true); // In development, allow all origins (web + mobile expo)
+    },
     credentials: true,
   }),
 );
