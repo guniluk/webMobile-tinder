@@ -1,7 +1,7 @@
-import { useState } from "react";
-import { Flame } from "lucide-react";
-import LoginForm from "../components/LoginForm";
-import SignUpForm from "../components/SignUpForm";
+import { useState } from 'react';
+import { Flame } from 'lucide-react';
+import LoginForm from '../components/LoginForm';
+import SignUpForm from '../components/SignUpForm';
 
 const AuthPage = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -15,12 +15,12 @@ const AuthPage = () => {
             <Flame className="w-7 h-7 text-white fill-white" />
           </div>
           <h1 className="text-2xl font-bold tracking-tight text-gray-900">
-            {isLogin ? "Sign in to Tinder" : "Create Account"}
+            {isLogin ? 'Sign in to Tinder' : 'Create Account'}
           </h1>
           <p className="text-sm text-gray-500 mt-1">
             {isLogin
-              ? "Welcome back! Please enter your details."
-              : "Find your perfect match today."}
+              ? 'Welcome back! Please enter your details.'
+              : 'Find your perfect match today.'}
           </p>
         </div>
 
@@ -31,8 +31,8 @@ const AuthPage = () => {
             onClick={() => setIsLogin(true)}
             className={`flex-1 py-2 text-sm font-medium rounded-lg transition-all duration-200 cursor-pointer ${
               isLogin
-                ? "bg-white text-gray-900 shadow-sm font-semibold"
-                : "text-gray-500 hover:text-gray-900"
+                ? 'bg-white text-gray-900 shadow-sm font-semibold'
+                : 'text-gray-500 hover:text-gray-900'
             }`}
           >
             Sign In
@@ -42,8 +42,8 @@ const AuthPage = () => {
             onClick={() => setIsLogin(false)}
             className={`flex-1 py-2 text-sm font-medium rounded-lg transition-all duration-200 cursor-pointer ${
               !isLogin
-                ? "bg-white text-gray-900 shadow-sm font-semibold"
-                : "text-gray-500 hover:text-gray-900"
+                ? 'bg-white text-gray-900 shadow-sm font-semibold'
+                : 'text-gray-500 hover:text-gray-900'
             }`}
           >
             Sign Up
@@ -57,7 +57,7 @@ const AuthPage = () => {
         <div className="mt-6 text-center text-sm text-gray-500">
           {isLogin ? (
             <p>
-              Don't have an account?{" "}
+              Don't have an account?{' '}
               <button
                 type="button"
                 onClick={() => setIsLogin(false)}
@@ -68,7 +68,7 @@ const AuthPage = () => {
             </p>
           ) : (
             <p>
-              Already have an account?{" "}
+              Already have an account?{' '}
               <button
                 type="button"
                 onClick={() => setIsLogin(true)}

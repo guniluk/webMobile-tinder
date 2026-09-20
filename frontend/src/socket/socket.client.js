@@ -1,8 +1,8 @@
-import { io } from "socket.io-client";
+import { io } from 'socket.io-client';
 
 const SOCKET_URL =
   import.meta.env.VITE_SOCKET_URL ||
-  (import.meta.env.MODE === "development" ? "http://localhost:3000" : "/");
+  (import.meta.env.MODE === 'development' ? 'http://localhost:3000' : '/');
 
 let socket = null;
 
@@ -13,8 +13,11 @@ let socket = null;
  */
 export const initializeSocket = (userId) => {
   if (socket) {
-    if (socket.connected) return socket;
+    if (socket.connected && socket.io?.opts?.query?.userId === userId) {
+      return socket;
+    }
     socket.disconnect();
+    socket = null;
   }
 
   socket = io(SOCKET_URL, {
@@ -26,19 +29,19 @@ export const initializeSocket = (userId) => {
     reconnection: true,
     reconnectionAttempts: 5,
     reconnectionDelay: 1000,
-    transports: ["websocket", "polling"],
+    transports: ['websocket', 'polling'],
   });
 
-  socket.on("connect", () => {
-    console.log("⚡ Socket connected successfully:", socket.id);
+  socket.on('connect', () => {
+    console.log('⚡ Socket connected successfully:', socket.id);
   });
 
-  socket.on("connect_error", (error) => {
-    console.error("❌ Socket connection error:", error.message);
+  socket.on('connect_error', (error) => {
+    console.error('❌ Socket connection error:', error.message);
   });
 
-  socket.on("disconnect", (reason) => {
-    console.log("🔌 Socket disconnected:", reason);
+  socket.on('disconnect', (reason) => {
+    console.log('🔌 Socket disconnected:', reason);
   });
 
   return socket;
@@ -55,6 +58,9 @@ export const getSocket = () => socket;
  */
 export const disconnectSocket = () => {
   if (socket) {
+    if (socket.connected) {
+      socket.emit('logout');
+    }
     socket.disconnect();
     socket = null;
   }

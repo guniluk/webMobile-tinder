@@ -1,6 +1,6 @@
-import { useState, useRef } from "react";
-import { X, Heart, Sparkles, User as UserIcon, Info } from "lucide-react";
-import { useMatchStore } from "../store/useMatchStore";
+import { useState, useRef } from 'react';
+import { X, Heart, Sparkles, User as UserIcon, Info } from 'lucide-react';
+import { useMatchStore } from '../store/useMatchStore';
 
 const SwipeCard = ({ user }) => {
   const { swipeRight, swipeLeft } = useMatchStore();
@@ -82,9 +82,9 @@ const SwipeCard = ({ user }) => {
         style={{
           transform: `translate3d(${dragOffset.x}px, ${dragOffset.y * 0.3}px, 0) rotate(${rotateDeg}deg)`,
           transition: isDragging
-            ? "none"
-            : "transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)",
-          cursor: isDragging ? "grabbing" : "grab",
+            ? 'none'
+            : 'transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
+          cursor: isDragging ? 'grabbing' : 'grab',
         }}
         className="relative w-full h-120 sm:h-135 rounded-3xl overflow-hidden shadow-2xl bg-gray-900 border border-gray-100/50"
       >
@@ -131,10 +131,10 @@ const SwipeCard = ({ user }) => {
               {user.age}
             </span>
             <span className="ml-auto px-2.5 py-0.5 bg-white/20 backdrop-blur-md rounded-full text-xs capitalize font-medium text-gray-100">
-              {user.gender === "male"
-                ? "남성"
-                : user.gender === "female"
-                  ? "여성"
+              {user.gender === 'male'
+                ? '남성'
+                : user.gender === 'female'
+                  ? '여성'
                   : user.gender}
             </span>
           </div>
@@ -145,7 +145,7 @@ const SwipeCard = ({ user }) => {
               <p
                 onClick={() => setShowFullBio((prev) => !prev)}
                 className={`text-xs sm:text-sm text-gray-200 leading-relaxed cursor-pointer ${
-                  showFullBio ? "" : "line-clamp-2"
+                  showFullBio ? '' : 'line-clamp-2'
                 }`}
               >
                 {user.bio}
@@ -157,7 +157,7 @@ const SwipeCard = ({ user }) => {
                   className="text-[11px] text-pink-300 hover:text-pink-200 underline mt-0.5 inline-flex items-center gap-0.5"
                 >
                   <Info className="w-3 h-3" />
-                  {showFullBio ? "접기" : "더보기"}
+                  {showFullBio ? '접기' : '더보기'}
                 </button>
               )}
             </div>

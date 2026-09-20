@@ -1,25 +1,27 @@
-import User from "../models/user.model.js";
-import { uploadFile, deleteFile } from "../utils/file.utils.js";
+import User from '../models/user.model.js';
+import { uploadFile, deleteFile } from '../utils/file.utils.js';
+import { getIO } from '../socket/socket.server.js';
 
 export const updateProfile = async (req, res) => {
   try {
     const { image, ...otherData } = req.body;
     let updatedData = otherData;
 
-    if (image && image.startsWith("data:image")) {
+    if (image && image.startsWith('data:image')) {
       if (req.user.image) {
         try {
           await deleteFile(req.user.image);
         } catch (error) {
-          console.error("Warning: Failed to delete previous image from Cloudinary:", error);
+          console.error(
+            'Warning: Failed to delete previous image from Cloudinary:',
+            error,
+          );
         }
       }
       try {
         updatedData.image = await uploadFile(image);
       } catch (error) {
-        return res
-          .status(400)
-          .json({ message: "Failed to upload new image" });
+        return res.status(400).json({ message: 'Failed to upload new image' });
       }
     }
 
@@ -27,18 +29,34 @@ export const updateProfile = async (req, res) => {
       req.user._id,
       updatedData,
       {
-        returnDocument: "after",
+        returnDocument: 'after',
         runValidators: true,
       },
     );
 
     if (!updatedUser) {
-      return res.status(404).json({ message: "User not found" });
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    // Broadcast profile update to all connected clients in real-time
+    try {
+      const io = getIO();
+      io.emit('userProfileUpdated', {
+        _id: updatedUser._id,
+        name: updatedUser.name,
+        image: updatedUser.image,
+        bio: updatedUser.bio,
+        age: updatedUser.age,
+        gender: updatedUser.gender,
+        genderPreference: updatedUser.genderPreference,
+      });
+    } catch (socketError) {
+      console.log('Socket emit error on profile update:', socketError.message);
     }
 
     res
       .status(200)
-      .json({ message: "Profile updated successfully", user: updatedUser });
+      .json({ message: 'Profile updated successfully', user: updatedUser });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -47,10 +65,10 @@ export const updateProfile = async (req, res) => {
 export const getUserById = async (req, res) => {
   try {
     const userId = req.params.userId;
-    const user = await User.findById(userId).select("-password");
+    const user = await User.findById(userId).select('-password');
 
     if (!user) {
-      return res.status(404).json({ message: "User not found" });
+      return res.status(404).json({ message: 'User not found' });
     }
 
     res.status(200).json({ user });

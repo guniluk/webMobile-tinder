@@ -1,23 +1,15 @@
-import React, { useEffect } from "react";
-import {
-  View,
-  Text,
-  ActivityIndicator,
-} from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { Flame, Sparkles } from "lucide-react-native";
-import { useMatchStore } from "../../store/useMatchStore";
-import { useAuthStore } from "../../store/useAuthStore";
-import SwipeCard from "../../components/SwipeCard";
-import NoMoreProfiles from "../../components/NoMoreProfiles";
+import React, { useEffect } from 'react';
+import { View, Text, ActivityIndicator } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { Flame, Sparkles } from 'lucide-react-native';
+import { useMatchStore } from '../../store/useMatchStore';
+import { useAuthStore } from '../../store/useAuthStore';
+import SwipeCard from '../../components/SwipeCard';
+import NoMoreProfiles from '../../components/NoMoreProfiles';
 
 export default function DiscoverScreen() {
-  const {
-    userProfiles,
-    isLoadingProfiles,
-    getUserProfiles,
-    getMyMatches,
-  } = useMatchStore();
+  const { userProfiles, isLoadingProfiles, getUserProfiles, getMyMatches } =
+    useMatchStore();
 
   const { onlineUsers } = useAuthStore();
 
@@ -29,7 +21,7 @@ export default function DiscoverScreen() {
   const currentProfile = userProfiles[0];
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-50" edges={["top"]}>
+    <SafeAreaView className="flex-1 bg-gray-50" edges={['top']}>
       {/* Top Header */}
       <View className="px-5 py-2.5 flex-row items-center justify-between border-b border-gray-100 bg-white shadow-xs">
         <View className="flex-row items-center gap-2">

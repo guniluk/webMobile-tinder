@@ -1,6 +1,6 @@
-import { useState, useRef, useEffect } from "react";
-import { createPortal } from "react-dom";
-import { Link, useNavigate } from "react-router-dom";
+import { useState, useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import {
   Flame,
   User as UserIcon,
@@ -10,9 +10,9 @@ import {
   Menu,
   X,
   Home,
-} from "lucide-react";
-import toast from "react-hot-toast";
-import { useAuthStore } from "../store/useAuthStore";
+} from 'lucide-react';
+import toast from 'react-hot-toast';
+import { useAuthStore } from '../store/useAuthStore';
 
 const Header = () => {
   const { user, logout } = useAuthStore();
@@ -29,19 +29,19 @@ const Header = () => {
         setIsDropdownOpen(false);
       }
     };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
   // Prevent scroll when mobile menu is open
   useEffect(() => {
     if (isMobileMenuOpen) {
-      document.body.style.overflow = "hidden";
+      document.body.style.overflow = 'hidden';
     } else {
-      document.body.style.overflow = "unset";
+      document.body.style.overflow = 'unset';
     }
     return () => {
-      document.body.style.overflow = "unset";
+      document.body.style.overflow = 'unset';
     };
   }, [isMobileMenuOpen]);
 
@@ -50,10 +50,10 @@ const Header = () => {
       setIsDropdownOpen(false);
       setIsMobileMenuOpen(false);
       await logout();
-      toast.success("로그아웃되었습니다.");
-      navigate("/auth");
+      toast.success('로그아웃되었습니다.');
+      navigate('/auth');
     } catch {
-      toast.error("로그아웃 중 오류가 발생했습니다.");
+      toast.error('로그아웃 중 오류가 발생했습니다.');
     }
   };
 
@@ -93,7 +93,7 @@ const Header = () => {
                 {user?.image ? (
                   <img
                     src={user.image}
-                    alt={user?.name || "User"}
+                    alt={user?.name || 'User'}
                     className="w-full h-full object-cover"
                   />
                 ) : (
@@ -104,12 +104,12 @@ const Header = () => {
             </div>
 
             <span className="text-sm font-semibold text-gray-800 max-w-30 truncate">
-              {user?.name || "사용자"}
+              {user?.name || '사용자'}
             </span>
 
             <ChevronDown
               className={`w-4 h-4 text-gray-400 group-hover:text-gray-600 transition-transform duration-200 ${
-                isDropdownOpen ? "rotate-180 text-pink-500" : ""
+                isDropdownOpen ? 'rotate-180 text-pink-500' : ''
               }`}
             />
           </button>
@@ -126,7 +126,7 @@ const Header = () => {
 
               <button
                 type="button"
-                onClick={() => handleNavigation("/profile")}
+                onClick={() => handleNavigation('/profile')}
                 className="w-full px-4 py-2.5 text-left text-sm text-gray-700 hover:bg-pink-50 hover:text-pink-600 flex items-center gap-2.5 transition-colors cursor-pointer font-medium"
               >
                 <UserPen className="w-4 h-4 text-gray-400 group-hover:text-pink-500" />
@@ -164,7 +164,7 @@ const Header = () => {
 
       {/* Mobile Fullscreen Menu via Portal (Solid White Opaque Background, Covering all under elements) */}
       {isMobileMenuOpen &&
-        typeof document !== "undefined" &&
+        typeof document !== 'undefined' &&
         createPortal(
           <div className="fixed inset-0 w-screen h-screen bg-white z-9999 flex flex-col justify-between p-6 sm:hidden animate-in fade-in duration-150">
             {/* Top Section */}
@@ -197,7 +197,7 @@ const Header = () => {
                     {user?.image ? (
                       <img
                         src={user.image}
-                        alt={user?.name || "User"}
+                        alt={user?.name || 'User'}
                         className="w-full h-full object-cover"
                       />
                     ) : (
@@ -209,7 +209,7 @@ const Header = () => {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
                     <p className="text-base font-bold text-gray-900 truncate">
-                      {user?.name || "사용자"}
+                      {user?.name || '사용자'}
                     </p>
                     <span className="text-[10px] font-semibold text-emerald-600 bg-emerald-100/70 px-1.5 py-0.2 rounded-md">
                       온라인
@@ -225,7 +225,7 @@ const Header = () => {
               <nav className="space-y-2.5 pt-2">
                 <button
                   type="button"
-                  onClick={() => handleNavigation("/")}
+                  onClick={() => handleNavigation('/')}
                   className="w-full flex items-center gap-3.5 px-4 py-3.5 text-base font-semibold text-gray-800 hover:bg-gray-100 rounded-2xl transition-colors cursor-pointer"
                 >
                   <div className="p-2 bg-gray-100 rounded-xl">
@@ -236,7 +236,7 @@ const Header = () => {
 
                 <button
                   type="button"
-                  onClick={() => handleNavigation("/profile")}
+                  onClick={() => handleNavigation('/profile')}
                   className="w-full flex items-center gap-3.5 px-4 py-3.5 text-base font-semibold text-gray-800 hover:bg-pink-50 hover:text-pink-600 rounded-2xl transition-colors cursor-pointer group"
                 >
                   <div className="p-2 bg-pink-50 text-pink-600 rounded-xl group-hover:bg-pink-100">

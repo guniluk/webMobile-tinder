@@ -1,9 +1,9 @@
-import { useState, useRef } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { ChevronLeft, Camera, Heart, Plus, Loader2 } from "lucide-react";
-import toast from "react-hot-toast";
-import { useAuthStore } from "../store/useAuthStore";
-import { useUserStore } from "../store/useUserStore";
+import { useState, useRef } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { ChevronLeft, Camera, Heart, Plus, Loader2 } from 'lucide-react';
+import toast from 'react-hot-toast';
+import { useAuthStore } from '../store/useAuthStore';
+import { useUserStore } from '../store/useUserStore';
 
 const ProfilePage = () => {
   const { user } = useAuthStore();
@@ -11,27 +11,39 @@ const ProfilePage = () => {
   const navigate = useNavigate();
   const fileInputRef = useRef(null);
 
-  const [name, setName] = useState(user?.name || "");
-  const [bio, setBio] = useState(user?.bio || "");
-  const [age, setAge] = useState(user?.age ? String(user.age) : "");
-  const [gender, setGender] = useState(user?.gender || "male");
+  const [name, setName] = useState(user?.name || '');
+  const [bio, setBio] = useState(user?.bio || '');
+  const [age, setAge] = useState(user?.age ? String(user.age) : '');
+  const [gender, setGender] = useState(user?.gender || 'male');
   const [genderPreference, setGenderPreference] = useState(
-    user?.genderPreference || "both",
+    user?.genderPreference || 'both',
   );
-  const [image, setImage] = useState(user?.image || "");
+  const [image, setImage] = useState(user?.image || '');
   const [isImageChanged, setIsImageChanged] = useState(false);
+
+  const [prevUser, setPrevUser] = useState(user);
+
+  if (user !== prevUser) {
+    setPrevUser(user);
+    setName(user?.name || '');
+    setBio(user?.bio || '');
+    setAge(user?.age ? String(user.age) : '');
+    setGender(user?.gender || 'male');
+    setGenderPreference(user?.genderPreference || 'both');
+    setImage(user?.image || '');
+  }
 
   const handleImageChange = (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (!file.type.startsWith("image/")) {
-      toast.error("이미지 파일만 업로드할 수 있습니다.");
+    if (!file.type.startsWith('image/')) {
+      toast.error('이미지 파일만 업로드할 수 있습니다.');
       return;
     }
 
     if (file.size > 5 * 1024 * 1024) {
-      toast.error("이미지 크기는 5MB 이하여야 합니다.");
+      toast.error('이미지 크기는 5MB 이하여야 합니다.');
       return;
     }
 
@@ -47,23 +59,23 @@ const ProfilePage = () => {
     e.preventDefault();
 
     if (!name.trim()) {
-      toast.error("이름을 입력해주세요.");
+      toast.error('이름을 입력해주세요.');
       return;
     }
 
     const numericAge = Number(age);
     if (isNaN(numericAge) || numericAge < 18 || numericAge > 100) {
-      toast.error("나이는 18세 이상 100세 이하로 입력해주세요.");
+      toast.error('나이는 18세 이상 100세 이하로 입력해주세요.');
       return;
     }
 
     if (!gender) {
-      toast.error("성별을 선택해주세요.");
+      toast.error('성별을 선택해주세요.');
       return;
     }
 
     if (!genderPreference) {
-      toast.error("선호 성별을 선택해주세요.");
+      toast.error('선호 성별을 선택해주세요.');
       return;
     }
 
@@ -81,34 +93,35 @@ const ProfilePage = () => {
 
     try {
       await updateProfile(payload);
-      navigate("/");
+      navigate('/');
     } catch {
       // toast handled in useUserStore
+      toast.error('프로필 업데이트에 실패했습니다.');
     }
   };
 
   return (
-    <div className="min-h-screen py-4 sm:py-8 px-3 sm:px-6 flex flex-col items-center justify-center">
-      <div className="w-full max-w-xl bg-white/95 backdrop-blur-md rounded-2xl sm:rounded-3xl shadow-xl border border-gray-100 p-5 sm:p-10">
+    <div className="w-full min-h-full pt-8 sm:pt-12 pb-16 sm:pb-24 px-3 sm:px-6 flex flex-col items-center justify-start">
+      <div className="w-full max-w-xl bg-white/95 backdrop-blur-md rounded-2xl sm:rounded-3xl shadow-xl border border-gray-100 p-5 sm:p-10 my-2 sm:my-4">
         {/* Header with Back button and Title */}
         <div className="flex items-center justify-between mb-6 sm:mb-8 pb-3 sm:pb-4 border-b border-gray-100">
           <Link
             to="/"
-            className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-medium text-gray-500 hover:text-pink-600 transition-colors"
+            className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-gray-700 bg-gray-100 hover:bg-pink-100 hover:text-pink-600 px-3 py-2 rounded-xl border border-gray-200 transition-all shadow-xs"
           >
-            <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5" />
+            <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600" />
             Back
           </Link>
           <h1 className="text-xl sm:text-3xl font-bold text-gray-900 tracking-tight">
             Your Profile
           </h1>
-          <div className="w-8 sm:w-12"></div>
+          <div className="w-16 sm:w-20"></div>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-5 sm:space-y-6">
           {/* Name Field */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1.5">
+            <label className="block text-sm font-semibold text-gray-800 mb-1.5">
               Full Name
             </label>
             <input
@@ -117,13 +130,13 @@ const ProfilePage = () => {
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="Your name"
-              className="w-full px-3.5 sm:px-4 py-2 sm:py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-pink-500 focus:bg-white transition-all duration-200"
+              className="w-full px-3.5 sm:px-4 py-2 sm:py-2.5 bg-gray-50 border border-gray-300 rounded-xl text-sm font-medium text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:bg-white focus:border-transparent transition-all duration-200"
             />
           </div>
 
           {/* Age Field */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1.5">
+            <label className="block text-sm font-semibold text-gray-800 mb-1.5">
               Age
             </label>
             <input
@@ -134,13 +147,13 @@ const ProfilePage = () => {
               value={age}
               onChange={(e) => setAge(e.target.value)}
               placeholder="Your age"
-              className="w-full px-3.5 sm:px-4 py-2 sm:py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-pink-500 focus:bg-white transition-all duration-200"
+              className="w-full px-3.5 sm:px-4 py-2 sm:py-2.5 bg-gray-50 border border-gray-300 rounded-xl text-sm font-medium text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:bg-white focus:border-transparent transition-all duration-200"
             />
           </div>
 
           {/* Bio Field */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1.5">
+            <label className="block text-sm font-semibold text-gray-800 mb-1.5">
               Bio
             </label>
             <textarea
@@ -148,7 +161,7 @@ const ProfilePage = () => {
               value={bio}
               onChange={(e) => setBio(e.target.value)}
               placeholder="Tell others about yourself..."
-              className="w-full px-3.5 sm:px-4 py-2 sm:py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-pink-500 focus:bg-white transition-all duration-200 resize-none"
+              className="w-full px-3.5 sm:px-4 py-2 sm:py-2.5 bg-gray-50 border border-gray-300 rounded-xl text-sm font-medium text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:bg-white focus:border-transparent transition-all duration-200 resize-none"
             />
           </div>
 
@@ -159,15 +172,15 @@ const ProfilePage = () => {
             </span>
             <div className="grid grid-cols-2 gap-2.5 sm:gap-3">
               {[
-                { value: "male", label: "Male" },
-                { value: "female", label: "Female" },
+                { value: 'male', label: 'Male' },
+                { value: 'female', label: 'Female' },
               ].map((item) => (
                 <label
                   key={item.value}
                   className={`flex items-center gap-3 py-2.5 px-4 text-sm font-medium rounded-xl border transition-all duration-200 cursor-pointer ${
                     gender === item.value
-                      ? "border-pink-500 bg-pink-50 text-pink-700 font-semibold shadow-xs"
-                      : "border-gray-200 bg-gray-50 text-gray-700 hover:bg-gray-100"
+                      ? 'border-pink-500 bg-pink-50 text-pink-700 font-semibold shadow-xs'
+                      : 'border-gray-200 bg-gray-50 text-gray-700 hover:bg-gray-100'
                   }`}
                 >
                   <input
@@ -191,16 +204,16 @@ const ProfilePage = () => {
             </span>
             <div className="grid grid-cols-3 gap-2 sm:gap-3">
               {[
-                { value: "male", label: "Men" },
-                { value: "female", label: "Women" },
-                { value: "both", label: "Everyone" },
+                { value: 'male', label: 'Men' },
+                { value: 'female', label: 'Women' },
+                { value: 'both', label: 'Everyone' },
               ].map((item) => (
                 <label
                   key={item.value}
                   className={`flex items-center gap-2 sm:gap-2.5 py-2.5 px-3 text-xs sm:text-sm font-medium rounded-xl border transition-all duration-200 cursor-pointer ${
                     genderPreference === item.value
-                      ? "border-pink-500 bg-pink-50 text-pink-700 font-semibold shadow-xs"
-                      : "border-gray-200 bg-gray-50 text-gray-700 hover:bg-gray-100"
+                      ? 'border-pink-500 bg-pink-50 text-pink-700 font-semibold shadow-xs'
+                      : 'border-gray-200 bg-gray-50 text-gray-700 hover:bg-gray-100'
                   }`}
                 >
                   <input
@@ -284,21 +297,31 @@ const ProfilePage = () => {
             />
           </div>
 
-          {/* Submit Button */}
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full mt-3 sm:mt-4 py-3 sm:py-3.5 px-4 bg-linear-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white font-semibold rounded-xl shadow-lg shadow-pink-500/25 transition-all duration-200 cursor-pointer disabled:opacity-50 flex items-center justify-center text-sm sm:text-base"
-          >
-            {loading ? (
-              <span className="inline-flex items-center gap-2">
-                <Loader2 className="animate-spin h-5 w-5 text-white" />
-                Saving Profile...
-              </span>
-            ) : (
-              "Save Profile"
-            )}
-          </button>
+          {/* Action Buttons */}
+          <div className="space-y-3 pt-2">
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full py-3 sm:py-3.5 px-4 bg-linear-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white font-semibold rounded-xl shadow-lg shadow-pink-500/25 transition-all duration-200 cursor-pointer disabled:opacity-50 flex items-center justify-center text-sm sm:text-base"
+            >
+              {loading ? (
+                <span className="inline-flex items-center gap-2">
+                  <Loader2 className="animate-spin h-5 w-5 text-white" />
+                  Saving Profile...
+                </span>
+              ) : (
+                'Save Profile'
+              )}
+            </button>
+
+            <Link
+              to="/"
+              className="w-full py-3 sm:py-3.5 px-4 bg-gray-100 hover:bg-gray-200 text-gray-700 hover:text-gray-900 font-semibold rounded-xl border border-gray-200 transition-all duration-200 flex items-center justify-center gap-2 text-sm sm:text-base cursor-pointer shadow-xs"
+            >
+              <ChevronLeft className="w-5 h-5 text-gray-600" />
+              Back to Home (홈으로 돌아가기)
+            </Link>
+          </div>
         </form>
       </div>
     </div>

@@ -1,8 +1,8 @@
-import { create } from "zustand";
-import { axiosInstance } from "../lib/axios";
-import toast from "react-hot-toast";
-import { getSocket } from "../socket/socket.client";
-import { useAuthStore } from "./useAuthStore";
+import { create } from 'zustand';
+import { axiosInstance } from '../lib/axios';
+import toast from 'react-hot-toast';
+import { getSocket } from '../socket/socket.client';
+import { useAuthStore } from './useAuthStore';
 
 export const useMessageStore = create((set, get) => ({
   messages: [],
@@ -31,8 +31,8 @@ export const useMessageStore = create((set, get) => ({
       set({ messages: res.data.messages || [] });
       get().markAsRead(userId);
     } catch (error) {
-      console.error("Error fetching messages:", error);
-      toast.error("메시지를 불러오는데 실패했습니다.");
+      console.error('Error fetching messages:', error);
+      toast.error('메시지를 불러오는데 실패했습니다.');
     } finally {
       set({ isLoadingMessages: false });
     }
@@ -42,7 +42,7 @@ export const useMessageStore = create((set, get) => ({
     if (!content.trim()) return;
     try {
       set({ isSendingMessage: true });
-      const res = await axiosInstance.post("/messages/send", {
+      const res = await axiosInstance.post('/messages/send', {
         receiverId,
         content: content.trim(),
       });
@@ -53,8 +53,8 @@ export const useMessageStore = create((set, get) => ({
         }));
       }
     } catch (error) {
-      console.error("Error sending message:", error);
-      toast.error("메시지 전송에 실패했습니다.");
+      console.error('Error sending message:', error);
+      toast.error('메시지 전송에 실패했습니다.');
     } finally {
       set({ isSendingMessage: false });
     }
@@ -64,10 +64,10 @@ export const useMessageStore = create((set, get) => ({
     const socket = getSocket();
     if (!socket) return;
 
-    socket.off("newMessage");
-    socket.on("newMessage", (newMessage) => {
+    socket.off('newMessage');
+    socket.on('newMessage', (newMessage) => {
       const senderId =
-        typeof newMessage.senderId === "object"
+        typeof newMessage.senderId === 'object'
           ? newMessage.senderId._id
           : newMessage.senderId;
 
@@ -84,11 +84,11 @@ export const useMessageStore = create((set, get) => ({
           messages: [...state.messages, newMessage],
         }));
       } else {
-        // Mark as unread with paperplane indicator
+        // Mark as unread with paper plane indicator
         if (!unreadSenders.includes(senderId)) {
           set({ unreadSenders: [...unreadSenders, senderId] });
         }
-        toast("✈️ 새로운 메시지가 도착했습니다!", {
+        toast('✈️ 새로운 메시지가 도착했습니다!', {
           id: `new-msg-${senderId}`,
           duration: 3000,
         });
@@ -99,7 +99,7 @@ export const useMessageStore = create((set, get) => ({
   unsubscribeFromGlobalMessages: () => {
     const socket = getSocket();
     if (socket) {
-      socket.off("newMessage");
+      socket.off('newMessage');
     }
   },
 }));

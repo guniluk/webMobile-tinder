@@ -28,6 +28,19 @@ export const useMatchStore = create((set, get) => ({
     socket.on("newUserRegistered", () => {
       get().getUserProfiles();
     });
+
+    // Real-time listener for user profile updates
+    socket.off("userProfileUpdated");
+    socket.on("userProfileUpdated", (updatedUser) => {
+      set((state) => ({
+        userProfiles: state.userProfiles.map((user) =>
+          user._id === updatedUser._id ? { ...user, ...updatedUser } : user,
+        ),
+        matches: state.matches.map((match) =>
+          match._id === updatedUser._id ? { ...match, ...updatedUser } : match,
+        ),
+      }));
+    });
   },
 
   unsubscribeFromNewMatches: () => {
@@ -35,6 +48,7 @@ export const useMatchStore = create((set, get) => ({
     if (socket) {
       socket.off("newMatch");
       socket.off("newUserRegistered");
+      socket.off("userProfileUpdated");
     }
   },
 

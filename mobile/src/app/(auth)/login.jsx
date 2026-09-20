@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from 'react';
 import {
   View,
   Text,
@@ -8,40 +8,39 @@ import {
   Platform,
   ScrollView,
   ActivityIndicator,
-  Alert,
-} from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { router, Link } from "expo-router";
-import { Flame, Mail, Lock, Eye, EyeOff } from "lucide-react-native";
-import { useAuthStore } from "../../store/useAuthStore";
+} from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { router, Link } from 'expo-router';
+import { Flame, Mail, Lock, Eye, EyeOff } from 'lucide-react-native';
+import { useAuthStore } from '../../store/useAuthStore';
 
 export default function LoginScreen() {
   const { login, loading } = useAuthStore();
 
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [errorMessage, setErrorMessage] = useState("");
+  const [errorMessage, setErrorMessage] = useState('');
 
   const handleLogin = async () => {
     if (!email.trim() || !password) {
-      setErrorMessage("이메일과 비밀번호를 모두 입력해주세요.");
+      setErrorMessage('이메일과 비밀번호를 모두 입력해주세요.');
       return;
     }
 
     try {
-      setErrorMessage("");
+      setErrorMessage('');
       await login(email.trim(), password);
-      router.replace("/(tabs)");
+      router.replace('/(tabs)');
     } catch (error) {
-      setErrorMessage(error.message || "로그인에 실패했습니다.");
+      setErrorMessage(error.message || '로그인에 실패했습니다.');
     }
   };
 
   return (
     <SafeAreaView className="flex-1 bg-white">
       <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         className="flex-1"
       >
         <ScrollView

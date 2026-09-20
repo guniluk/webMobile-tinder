@@ -18,18 +18,19 @@ export const uploadFile = async (file) => {
 };
 
 export const deleteFile = async (url) => {
-  if (!url) return;
+  if (!url || typeof url !== 'string') return;
+  if (!url.includes('res.cloudinary.com')) return;
   try {
     // URL에서 폴더명('tinder')과 파일명을 분리하여 public_id 생성
     // 예: "https://.../tinder/abc123xyz.jpg" -> "tinder/abc123xyz"
-    const parts = url.split("/");
+    const parts = url.split('/');
+    if (parts.length < 2) return;
     const folder = parts[parts.length - 2];
-    const filename = parts[parts.length - 1].split(".")[0];
+    const filename = parts[parts.length - 1].split('.')[0];
     const publicId = `${folder}/${filename}`;
 
     return await cloudinary.uploader.destroy(publicId);
   } catch (error) {
-    console.error("Cloudinary delete error:", error);
-    throw error;
+    console.error('Cloudinary delete error:', error);
   }
 };

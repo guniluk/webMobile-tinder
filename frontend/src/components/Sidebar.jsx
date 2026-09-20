@@ -1,15 +1,15 @@
-import { useEffect } from "react";
-import { Link } from "react-router-dom";
+import { useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import {
   MessageCircleHeart,
   Users,
   Loader2,
   Sparkles,
   Send,
-} from "lucide-react";
-import { useMatchStore } from "../store/useMatchStore";
-import { useAuthStore } from "../store/useAuthStore";
-import { useMessageStore } from "../store/useMessageStore";
+} from 'lucide-react';
+import { useMatchStore } from '../store/useMatchStore';
+import { useAuthStore } from '../store/useAuthStore';
+import { useMessageStore } from '../store/useMessageStore';
 
 const Sidebar = () => {
   const { matches, isLoadingMatches, getMyMatches } = useMatchStore();
@@ -79,16 +79,16 @@ const Sidebar = () => {
                 to={`/chat/${match._id}`}
                 className={`flex items-center gap-3.5 p-3 rounded-2xl transition-all duration-200 group border cursor-pointer ${
                   hasUnread
-                    ? "bg-rose-50/80 border-rose-200 shadow-xs hover:bg-rose-100/70"
-                    : "hover:bg-pink-50/70 active:bg-pink-100/50 border-transparent hover:border-pink-100/80 hover:shadow-xs"
+                    ? 'bg-rose-50/80 border-rose-200 shadow-xs hover:bg-rose-100/70'
+                    : 'hover:bg-pink-50/70 active:bg-pink-100/50 border-transparent hover:border-pink-100/80 hover:shadow-xs'
                 }`}
               >
                 <div className="relative">
                   <div
                     className={`w-12 h-12 rounded-full overflow-hidden bg-gray-100 border-2 transition-colors shrink-0 shadow-xs ${
                       hasUnread
-                        ? "border-rose-500 ring-2 ring-rose-300/50"
-                        : "border-pink-200 group-hover:border-pink-500"
+                        ? 'border-rose-500 ring-2 ring-rose-300/50'
+                        : 'border-pink-200 group-hover:border-pink-500'
                     }`}
                   >
                     {match.image ? (
@@ -99,7 +99,7 @@ const Sidebar = () => {
                       />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center bg-pink-100 text-pink-500 font-bold text-sm">
-                        {match.name?.[0] || "?"}
+                        {match.name?.[0] || '?'}
                       </div>
                     )}
                   </div>
@@ -128,8 +128,8 @@ const Sidebar = () => {
                       <h4
                         className={`font-bold text-sm truncate transition-colors ${
                           hasUnread
-                            ? "text-rose-600 font-extrabold"
-                            : "text-gray-900 group-hover:text-pink-600"
+                            ? 'text-rose-600 font-extrabold'
+                            : 'text-gray-900 group-hover:text-pink-600'
                         }`}
                       >
                         {match.name}
@@ -154,15 +154,15 @@ const Sidebar = () => {
                   <p
                     className={`text-xs truncate mt-0.5 ${
                       hasUnread
-                        ? "text-rose-500 font-semibold"
-                        : "text-gray-500 font-normal"
+                        ? 'text-rose-500 font-semibold'
+                        : 'text-gray-500 font-normal'
                     }`}
                   >
                     {hasUnread
-                      ? "✈️ 새로운 메시지가 도착했습니다!"
+                      ? '✈️ 새로운 메시지가 도착했습니다!'
                       : isOnline
-                        ? "지금 대화 가능합니다!"
-                        : "새로운 매치! 메시지를 보내보세요."}
+                        ? '지금 대화 가능합니다!'
+                        : '새로운 매치! 메시지를 보내보세요.'}
                   </p>
                 </div>
               </Link>

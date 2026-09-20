@@ -1,12 +1,12 @@
-import Conversation from "../models/conversation.model.js";
-import Message from "../models/message.model.js";
-import { getReceiverSocketId, getIO } from "../socket/socket.server.js";
+import Conversation from '../models/conversation.model.js';
+import Message from '../models/message.model.js';
+import { getReceiverSocketId, getIO } from '../socket/socket.server.js';
 
 export const sendMessage = async (req, res) => {
   try {
     const { content, receiverId } = req.body;
     if (!content || !receiverId) {
-      return res.status(400).json({ message: "All fields are required" });
+      return res.status(400).json({ message: 'All fields are required' });
     }
     const senderId = req.user._id;
 
@@ -28,21 +28,18 @@ export const sendMessage = async (req, res) => {
       conversationId: conversation._id,
     });
 
-    // Send message in realtime to receiver (webSocket)
+    // Send message in realtime to receiver (webSocket multi-device support)
     try {
-      const receiverSocketId = getReceiverSocketId(receiverId.toString());
-      if (receiverSocketId) {
-        const io = getIO();
-        io.to(receiverSocketId).emit("newMessage", newMessage);
-      }
+      const io = getIO();
+      io.to(receiverId.toString()).emit('newMessage', newMessage);
     } catch (socketError) {
-      console.log("Socket emit error:", socketError.message);
+      console.log('Socket emit error:', socketError.message);
     }
 
-    res.status(201).json({ message: "Message sent successfully", newMessage });
+    res.status(201).json({ message: 'Message sent successfully', newMessage });
   } catch (error) {
-    console.log("Error in sendMessage controller", error);
-    res.status(500).json({ message: "Internal Server Error" });
+    console.log('Error in sendMessage controller', error);
+    res.status(500).json({ message: 'Internal Server Error' });
   }
 };
 
@@ -54,7 +51,7 @@ export const getConversation = async (req, res) => {
     const conversation = await Conversation.findOne({
       participants: { $all: [userId, otherUserId] },
     })
-      .populate("participants", "name email image")
+      .populate('participants', 'name email image')
       .lean();
 
     if (!conversation) {
@@ -65,13 +62,12 @@ export const getConversation = async (req, res) => {
       conversationId: conversation._id,
     })
       .sort({ createdAt: 1 })
-      .populate("senderId", "name email image")
+      .populate('senderId', 'name email image')
       .lean();
 
     res.status(200).json({ conversation, messages });
   } catch (error) {
-    console.error("Error in getConversation controller:", error);
-    res.status(500).json({ message: "Internal Server Error" });
+    console.error('Error in getConversation controller:', error);
+    res.status(500).json({ message: 'Internal Server Error' });
   }
 };
-

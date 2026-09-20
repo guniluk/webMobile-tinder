@@ -1,6 +1,6 @@
-import { create } from "zustand";
-import { axiosInstance } from "../lib/axios";
-import { initializeSocket, disconnectSocket } from "../socket/socket.client";
+import { create } from 'zustand';
+import { axiosInstance } from '../lib/axios';
+import { initializeSocket, disconnectSocket } from '../socket/socket.client';
 
 export const useAuthStore = create((set, get) => ({
   user: null,
@@ -16,8 +16,8 @@ export const useAuthStore = create((set, get) => ({
     const socket = initializeSocket(user._id);
     set({ socket });
 
-    socket.off("getOnlineUsers");
-    socket.on("getOnlineUsers", (users) => {
+    socket.off('getOnlineUsers');
+    socket.on('getOnlineUsers', (users) => {
       set({ onlineUsers: users });
     });
   },
@@ -27,11 +27,10 @@ export const useAuthStore = create((set, get) => ({
     set({ socket: null, onlineUsers: [] });
   },
 
-
   signup: async (signupData) => {
     try {
       set({ loading: true });
-      const response = await axiosInstance.post("/auth/signup", signupData);
+      const response = await axiosInstance.post('/auth/signup', signupData);
       const user = response.data?.user || response.data;
       set({ user, isAuthenticated: true, loading: false });
       get().connectSocket();
@@ -39,7 +38,7 @@ export const useAuthStore = create((set, get) => ({
     } catch (error) {
       set({ loading: false });
       throw new Error(
-        error.response?.data?.message || "Failed to create account",
+        error.response?.data?.message || 'Failed to create account',
         { cause: error },
       );
     }
@@ -48,7 +47,7 @@ export const useAuthStore = create((set, get) => ({
   login: async (email, password) => {
     try {
       set({ loading: true });
-      const response = await axiosInstance.post("/auth/login", {
+      const response = await axiosInstance.post('/auth/login', {
         email,
         password,
       });
@@ -58,7 +57,7 @@ export const useAuthStore = create((set, get) => ({
       return response.data;
     } catch (error) {
       set({ loading: false });
-      throw new Error(error.response?.data?.message || "Failed to sign in", {
+      throw new Error(error.response?.data?.message || 'Failed to sign in', {
         cause: error,
       });
     }
@@ -66,25 +65,24 @@ export const useAuthStore = create((set, get) => ({
 
   logout: async () => {
     try {
-      await axiosInstance.post("/auth/logout");
-      get().disconnectSocket();
-      set({ user: null, isAuthenticated: false });
+      await axiosInstance.post('/auth/logout');
     } catch (error) {
-      console.error("Logout error:", error);
+      console.error('Logout error:', error);
+    } finally {
       get().disconnectSocket();
-      set({ user: null, isAuthenticated: false });
+      set({ user: null, isAuthenticated: false, onlineUsers: [] });
     }
   },
 
   checkAuth: async () => {
     try {
-      const response = await axiosInstance.get("/auth/me");
+      const response = await axiosInstance.get('/auth/me');
       const user = response.data?.user || response.data;
       set({ user, isAuthenticated: true });
       get().connectSocket();
     } catch {
       get().disconnectSocket();
-      set({ user: null, isAuthenticated: false });
+      set({ user: null, isAuthenticated: false, onlineUsers: [] });
     }
   },
 }));

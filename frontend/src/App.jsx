@@ -1,14 +1,15 @@
-import { Routes, Route, Navigate } from "react-router-dom";
-import { Toaster } from "react-hot-toast";
-import Header from "./components/Header";
-import HomePage from "./pages/HomePage";
-import AuthPage from "./pages/AuthPage";
-import ProfilePage from "./pages/ProfilePage";
-import ChatPage from "./pages/ChatPage";
-import { useAuthStore } from "./store/useAuthStore";
-import { useMatchStore } from "./store/useMatchStore";
-import { useMessageStore } from "./store/useMessageStore";
-import { useEffect } from "react";
+import { Routes, Route, Navigate } from 'react-router-dom';
+import { Toaster } from 'react-hot-toast';
+import { useEffect } from 'react';
+
+import Header from './components/Header';
+import HomePage from './pages/HomePage';
+import AuthPage from './pages/AuthPage';
+import ProfilePage from './pages/ProfilePage';
+import ChatPage from './pages/ChatPage';
+import { useAuthStore } from './store/useAuthStore';
+import { useMatchStore } from './store/useMatchStore';
+import { useMessageStore } from './store/useMessageStore';
 
 const App = () => {
   const { isAuthenticated, checkAuth, loading, socket } = useAuthStore();
@@ -64,7 +65,9 @@ const App = () => {
           />
           <Route
             path="/profile"
-            element={isAuthenticated ? <ProfilePage /> : <Navigate to="/auth" />}
+            element={
+              isAuthenticated ? <ProfilePage /> : <Navigate to="/auth" />
+            }
           />
           <Route
             path="/chat/:id"

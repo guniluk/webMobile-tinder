@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from 'react';
 import {
   View,
   Text,
@@ -8,11 +8,10 @@ import {
   Platform,
   ScrollView,
   ActivityIndicator,
-} from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { router, Link } from "expo-router";
+} from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { router, Link } from 'expo-router';
 import {
-  Flame,
   User,
   Mail,
   Lock,
@@ -20,40 +19,40 @@ import {
   Eye,
   EyeOff,
   ChevronLeft,
-} from "lucide-react-native";
-import { useAuthStore } from "../../store/useAuthStore";
+} from 'lucide-react-native';
+import { useAuthStore } from '../../store/useAuthStore';
 
 export default function SignupScreen() {
   const { signup, loading } = useAuthStore();
 
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [age, setAge] = useState("");
-  const [gender, setGender] = useState("male");
-  const [genderPreference, setGenderPreference] = useState("both");
-  const [errorMessage, setErrorMessage] = useState("");
+  const [age, setAge] = useState('');
+  const [gender, setGender] = useState('male');
+  const [genderPreference, setGenderPreference] = useState('both');
+  const [errorMessage, setErrorMessage] = useState('');
 
   const handleSignup = async () => {
     if (!name.trim() || !email.trim() || !password || !age) {
-      setErrorMessage("모든 필수 항목을 입력해주세요.");
+      setErrorMessage('모든 필수 항목을 입력해주세요.');
       return;
     }
 
     const numAge = parseInt(age, 10);
     if (isNaN(numAge) || numAge < 18 || numAge > 100) {
-      setErrorMessage("만 18세 이상 100세 이하만 가입 가능합니다.");
+      setErrorMessage('만 18세 이상 100세 이하만 가입 가능합니다.');
       return;
     }
 
     if (password.length < 4) {
-      setErrorMessage("비밀번호는 최소 4자리 이상이어야 합니다.");
+      setErrorMessage('비밀번호는 최소 4자리 이상이어야 합니다.');
       return;
     }
 
     try {
-      setErrorMessage("");
+      setErrorMessage('');
       await signup({
         name: name.trim(),
         email: email.trim(),
@@ -62,16 +61,16 @@ export default function SignupScreen() {
         gender,
         genderPreference,
       });
-      router.replace("/(tabs)");
+      router.replace('/(tabs)');
     } catch (error) {
-      setErrorMessage(error.message || "회원가입에 실패했습니다.");
+      setErrorMessage(error.message || '회원가입에 실패했습니다.');
     }
   };
 
   return (
     <SafeAreaView className="flex-1 bg-white">
       <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         className="flex-1"
       >
         {/* Top Header */}
@@ -189,8 +188,8 @@ export default function SignupScreen() {
             </Text>
             <View className="flex-row gap-3">
               {[
-                { label: "남성", value: "male" },
-                { label: "여성", value: "female" },
+                { label: '남성', value: 'male' },
+                { label: '여성', value: 'female' },
               ].map((item) => (
                 <TouchableOpacity
                   key={item.value}
@@ -198,13 +197,13 @@ export default function SignupScreen() {
                   onPress={() => setGender(item.value)}
                   className={`flex-1 py-3 rounded-2xl border items-center justify-center ${
                     gender === item.value
-                      ? "bg-rose-50 border-rose-500"
-                      : "bg-gray-50 border-gray-200"
+                      ? 'bg-rose-50 border-rose-500'
+                      : 'bg-gray-50 border-gray-200'
                   }`}
                 >
                   <Text
                     className={`text-sm font-bold ${
-                      gender === item.value ? "text-rose-600" : "text-gray-700"
+                      gender === item.value ? 'text-rose-600' : 'text-gray-700'
                     }`}
                   >
                     {item.label}
@@ -221,9 +220,9 @@ export default function SignupScreen() {
             </Text>
             <View className="flex-row gap-2">
               {[
-                { label: "남성", value: "male" },
-                { label: "여성", value: "female" },
-                { label: "모두", value: "both" },
+                { label: '남성', value: 'male' },
+                { label: '여성', value: 'female' },
+                { label: '모두', value: 'both' },
               ].map((item) => (
                 <TouchableOpacity
                   key={item.value}
@@ -231,15 +230,15 @@ export default function SignupScreen() {
                   onPress={() => setGenderPreference(item.value)}
                   className={`flex-1 py-3 rounded-2xl border items-center justify-center ${
                     genderPreference === item.value
-                      ? "bg-rose-50 border-rose-500"
-                      : "bg-gray-50 border-gray-200"
+                      ? 'bg-rose-50 border-rose-500'
+                      : 'bg-gray-50 border-gray-200'
                   }`}
                 >
                   <Text
                     className={`text-sm font-bold ${
                       genderPreference === item.value
-                        ? "text-rose-600"
-                        : "text-gray-700"
+                        ? 'text-rose-600'
+                        : 'text-gray-700'
                     }`}
                   >
                     {item.label}
@@ -259,18 +258,20 @@ export default function SignupScreen() {
             {loading ? (
               <ActivityIndicator color="#FFFFFF" />
             ) : (
-              <Text className="text-white font-bold text-base">회원가입 완료</Text>
+              <Text className="text-white font-bold text-base">
+                회원가입 완료
+              </Text>
             )}
           </TouchableOpacity>
 
           {/* Login Link */}
           <View className="flex-row items-center justify-center mt-6 mb-8">
-            <Text className="text-sm text-gray-500">이미 계정이 있으신가요? </Text>
+            <Text className="text-sm text-gray-500">
+              이미 계정이 있으신가요?{' '}
+            </Text>
             <Link href="/(auth)/login" asChild>
               <TouchableOpacity>
-                <Text className="text-sm font-bold text-rose-500">
-                  로그인
-                </Text>
+                <Text className="text-sm font-bold text-rose-500">로그인</Text>
               </TouchableOpacity>
             </Link>
           </View>

@@ -1,6 +1,6 @@
-import { CronJob } from "cron";
-import https from "https";
-import http from "http";
+import { CronJob } from 'cron';
+import https from 'https';
+import http from 'http';
 
 /**
  * Render.com free tier spins down after 15 minutes of inactivity.
@@ -8,9 +8,9 @@ import http from "http";
  */
 export const initCronJob = () => {
   // Only run cron keep-alive in production environment (disabled in local development)
-  if (process.env.NODE_ENV !== "production") {
+  if (process.env.NODE_ENV !== 'production') {
     console.log(
-      "ℹ️ Development mode detected. Keep-alive cron job is disabled for local environment.",
+      'Development mode detected. Keep-alive cron job is disabled for local environment.',
     );
     return;
   }
@@ -22,22 +22,22 @@ export const initCronJob = () => {
 
   if (
     !targetUrl ||
-    targetUrl.includes("localhost") ||
-    targetUrl.includes("127.0.0.1")
+    targetUrl.includes('localhost') ||
+    targetUrl.includes('127.0.0.1')
   ) {
     console.log(
-      "ℹ️ No valid external target URL specified for cron job. Keep-alive cron is paused.",
+      'No valid external target URL specified for cron job. Keep-alive cron is paused.',
     );
     return;
   }
 
   // Cron schedule: every 14 minutes ("*/14 * * * *")
-  const job = new CronJob("*/14 * * * *", () => {
-    const healthUrl = targetUrl.endsWith("/")
+  const job = new CronJob('*/14 * * * *', () => {
+    const healthUrl = targetUrl.endsWith('/')
       ? `${targetUrl}api/health`
       : `${targetUrl}/api/health`;
 
-    const client = healthUrl.startsWith("https") ? https : http;
+    const client = healthUrl.startsWith('https') ? https : http;
 
     client
       .get(healthUrl, (res) => {
@@ -51,13 +51,13 @@ export const initCronJob = () => {
           );
         }
       })
-      .on("error", (err) => {
-        console.error("[Cron] Error sending keep-alive ping:", err.message);
+      .on('error', (err) => {
+        console.error('[Cron] Error sending keep-alive ping:', err.message);
       });
   });
 
   job.start();
   console.log(
-    `⏰ Keep-alive cron job scheduled every 14 minutes targeting: ${targetUrl}`,
+    `Keep-alive cron job scheduled every 14 minutes targeting: ${targetUrl}`,
   );
 };

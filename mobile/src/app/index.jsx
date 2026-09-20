@@ -1,7 +1,7 @@
-import React, { useEffect } from "react";
-import { Redirect } from "expo-router";
-import { useAuthStore } from "../store/useAuthStore";
-import { View, ActivityIndicator } from "react-native";
+import { useEffect } from 'react';
+import { Redirect } from 'expo-router';
+import { View, ActivityIndicator } from 'react-native';
+import { useAuthStore } from '../store/useAuthStore';
 
 export default function Index() {
   const { isAuthenticated, isCheckingAuth, checkAuth } = useAuthStore();
