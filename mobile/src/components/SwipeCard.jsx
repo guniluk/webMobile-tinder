@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import { useRef, useState } from "react";
 import {
   View,
   Text,
@@ -9,7 +9,13 @@ import {
   Pressable,
 } from "react-native";
 import { Image } from "expo-image";
-import { X, Heart, Sparkles, User as UserIcon, Info } from "lucide-react-native";
+import {
+  X,
+  Heart,
+  Sparkles,
+  User as UserIcon,
+  Info,
+} from "lucide-react-native";
 import { useMatchStore } from "../store/useMatchStore";
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
@@ -91,12 +97,12 @@ export const SwipeCard = ({ user }) => {
   const cardHeight = Math.min(SCREEN_HEIGHT * 0.62, 540);
 
   return (
-    <View className="w-full items-center justify-center px-4">
+    <View className="items-center justify-center w-full px-4">
       {/* Draggable Card */}
       <Animated.View
         {...panResponder.panHandlers}
         style={[cardStyle, { height: cardHeight }]}
-        className="w-full rounded-3xl overflow-hidden bg-gray-900 shadow-2xl relative border border-gray-100/30"
+        className="relative w-full overflow-hidden bg-gray-900 border shadow-2xl rounded-3xl border-gray-100/30"
       >
         {/* User Image */}
         {user.image ? (
@@ -107,11 +113,11 @@ export const SwipeCard = ({ user }) => {
             style={{ width: "100%", height: "100%" }}
           />
         ) : (
-          <View className="w-full h-full items-center justify-center bg-rose-500 p-6">
-            <View className="w-24 h-24 rounded-full bg-white/20 items-center justify-center mb-4">
+          <View className="items-center justify-center w-full h-full p-6 bg-rose-500">
+            <View className="items-center justify-center w-24 h-24 mb-4 rounded-full bg-white/20">
               <UserIcon size={48} color="#FFFFFF" />
             </View>
-            <Text className="text-white text-2xl font-bold">{user.name}</Text>
+            <Text className="text-2xl font-bold text-white">{user.name}</Text>
           </View>
         )}
 
@@ -120,7 +126,7 @@ export const SwipeCard = ({ user }) => {
           style={{ opacity: likeOpacity }}
           className="absolute top-8 left-8 border-4 border-emerald-400 px-4 py-1.5 rounded-2xl -rotate-12 bg-black/20"
         >
-          <Text className="text-emerald-400 font-black text-3xl tracking-widest uppercase">
+          <Text className="text-3xl font-black tracking-widest uppercase text-emerald-400">
             LIKE
           </Text>
         </Animated.View>
@@ -130,24 +136,24 @@ export const SwipeCard = ({ user }) => {
           style={{ opacity: nopeOpacity }}
           className="absolute top-8 right-8 border-4 border-rose-500 px-4 py-1.5 rounded-2xl rotate-12 bg-black/20"
         >
-          <Text className="text-rose-500 font-black text-3xl tracking-widest uppercase">
+          <Text className="text-3xl font-black tracking-widest uppercase text-rose-500">
             NOPE
           </Text>
         </Animated.View>
 
         {/* Bottom Details Overlay */}
-        <View className="absolute inset-x-0 bottom-0 bg-black/75 pt-12 pb-5 px-5">
+        <View className="absolute inset-x-0 bottom-0 px-5 pt-12 pb-5 bg-black/75">
           <View className="flex-row items-baseline justify-between mb-1.5">
             <View className="flex-row items-baseline gap-2">
-              <Text className="text-white text-2xl font-black">
+              <Text className="text-2xl font-black text-white">
                 {user.name}
               </Text>
-              <Text className="text-gray-200 text-xl font-light">
+              <Text className="text-xl font-light text-gray-200">
                 {user.age}
               </Text>
             </View>
             <View className="px-2.5 py-1 bg-white/20 rounded-full">
-              <Text className="text-white text-xs font-semibold">
+              <Text className="text-xs font-semibold text-white">
                 {user.gender === "male"
                   ? "남성"
                   : user.gender === "female"
@@ -162,21 +168,21 @@ export const SwipeCard = ({ user }) => {
             <Pressable onPress={() => setShowFullBio(!showFullBio)}>
               <Text
                 numberOfLines={showFullBio ? undefined : 2}
-                className="text-gray-200 text-xs leading-relaxed"
+                className="text-xs leading-relaxed text-gray-200"
               >
                 {user.bio}
               </Text>
               {user.bio.length > 50 && (
                 <View className="flex-row items-center gap-1 mt-1">
                   <Info size={12} color="#F472B6" />
-                  <Text className="text-pink-400 text-xs font-medium">
+                  <Text className="text-xs font-medium text-pink-400">
                     {showFullBio ? "접기" : "더보기"}
                   </Text>
                 </View>
               )}
             </Pressable>
           ) : (
-            <Text className="text-gray-400 text-xs italic">
+            <Text className="text-xs italic text-gray-400">
               작성된 소개글이 없습니다.
             </Text>
           )}
@@ -189,7 +195,7 @@ export const SwipeCard = ({ user }) => {
         <TouchableOpacity
           activeOpacity={0.8}
           onPress={() => forceSwipe("left")}
-          className="w-16 h-16 rounded-full bg-white shadow-lg items-center justify-center border border-rose-100"
+          className="items-center justify-center w-16 h-16 bg-white border rounded-full shadow-lg border-rose-100"
           style={{
             shadowColor: "#000",
             shadowOffset: { width: 0, height: 4 },
@@ -202,7 +208,7 @@ export const SwipeCard = ({ user }) => {
         </TouchableOpacity>
 
         {/* Super Like Deco */}
-        <View className="w-11 h-11 rounded-full bg-amber-400 items-center justify-center shadow-md">
+        <View className="items-center justify-center rounded-full shadow-md w-11 h-11 bg-amber-400">
           <Sparkles size={20} color="#FFFFFF" />
         </View>
 
@@ -210,7 +216,7 @@ export const SwipeCard = ({ user }) => {
         <TouchableOpacity
           activeOpacity={0.8}
           onPress={() => forceSwipe("right")}
-          className="w-16 h-16 rounded-full bg-rose-500 shadow-lg items-center justify-center"
+          className="items-center justify-center w-16 h-16 rounded-full shadow-lg bg-rose-500"
           style={{
             shadowColor: "#FF4458",
             shadowOffset: { width: 0, height: 6 },

@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 import { View, Text, TouchableOpacity, Animated } from "react-native";
 import { router } from "expo-router";
 import { Image } from "expo-image";
@@ -68,7 +68,7 @@ export const MessageToast = () => {
         onPress={handlePress}
         className="bg-gray-900/95 p-3.5 rounded-2xl flex-row items-center gap-3 border border-gray-700 shadow-2xl"
       >
-        <View className="w-10 h-10 rounded-full overflow-hidden bg-rose-500 items-center justify-center">
+        <View className="items-center justify-center w-10 h-10 overflow-hidden rounded-full bg-rose-500">
           {sender.image ? (
             <Image
               source={{ uri: sender.image }}
@@ -81,11 +81,8 @@ export const MessageToast = () => {
         </View>
 
         <View className="flex-1">
-          <Text className="text-white font-bold text-sm">{sender.name}</Text>
-          <Text
-            numberOfLines={1}
-            className="text-gray-300 text-xs mt-0.5"
-          >
+          <Text className="text-sm font-bold text-white">{sender.name}</Text>
+          <Text numberOfLines={1} className="text-gray-300 text-xs mt-0.5">
             {newMessageAlert.content}
           </Text>
         </View>

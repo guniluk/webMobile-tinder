@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import {
   View,
   Text,
@@ -13,15 +13,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Image } from "expo-image";
 import * as ImagePicker from "expo-image-picker";
-import {
-  Camera,
-  Heart,
-  LogOut,
-  User,
-  Calendar,
-  Sparkles,
-  Check,
-} from "lucide-react-native";
+import { Camera, LogOut, User, Calendar } from "lucide-react-native";
 import { useAuthStore } from "../../store/useAuthStore";
 import { useUserStore } from "../../store/useUserStore";
 import { router } from "expo-router";
@@ -133,8 +125,8 @@ export default function ProfileScreen() {
   return (
     <SafeAreaView className="flex-1 bg-white" edges={["top"]}>
       {/* Top Header */}
-      <View className="px-5 py-3 border-b border-gray-100 flex-row items-center justify-between">
-        <Text className="text-2xl font-black text-gray-900 tracking-tight">
+      <View className="flex-row items-center justify-between px-5 py-3 border-b border-gray-100">
+        <Text className="text-2xl font-black tracking-tight text-gray-900">
           내 프로필
         </Text>
         <TouchableOpacity
@@ -182,7 +174,7 @@ export default function ProfileScreen() {
               onPress={pickImage}
               className="relative"
             >
-              <View className="w-36 h-36 rounded-3xl overflow-hidden bg-gray-100 border-2 border-dashed border-rose-300 shadow-md">
+              <View className="overflow-hidden bg-gray-100 border-2 border-dashed shadow-md w-36 h-36 rounded-3xl border-rose-300">
                 {image ? (
                   <Image
                     source={{ uri: image }}
@@ -190,7 +182,7 @@ export default function ProfileScreen() {
                     contentFit="cover"
                   />
                 ) : (
-                  <View className="w-full h-full bg-rose-50 items-center justify-center p-4">
+                  <View className="items-center justify-center w-full h-full p-4 bg-rose-50">
                     <Camera size={32} color="#FF4458" />
                     <Text className="text-[11px] font-bold text-rose-500 mt-2 text-center">
                       소개 사진 추가
@@ -200,12 +192,12 @@ export default function ProfileScreen() {
               </View>
 
               {/* Edit Badge */}
-              <View className="absolute -bottom-2 -right-2 w-10 h-10 rounded-full bg-rose-500 items-center justify-center border-2 border-white shadow-md">
+              <View className="absolute items-center justify-center w-10 h-10 border-2 border-white rounded-full shadow-md -bottom-2 -right-2 bg-rose-500">
                 <Camera size={18} color="#FFFFFF" />
               </View>
             </TouchableOpacity>
 
-            <Text className="text-xs text-gray-400 mt-3">
+            <Text className="mt-3 text-xs text-gray-400">
               터치하여 대표 소개 사진을 변경하세요
             </Text>
           </View>
@@ -214,10 +206,10 @@ export default function ProfileScreen() {
           <View className="mt-4 space-y-4">
             {/* Name */}
             <View className="mb-3">
-              <Text className="text-xs font-bold text-gray-700 mb-1 uppercase tracking-wider">
+              <Text className="mb-1 text-xs font-bold tracking-wider text-gray-700 uppercase">
                 이름
               </Text>
-              <View className="flex-row items-center bg-gray-50 border border-gray-200 rounded-2xl px-4 py-3">
+              <View className="flex-row items-center px-4 py-3 border border-gray-200 bg-gray-50 rounded-2xl">
                 <User size={18} color="#9CA3AF" />
                 <TextInput
                   value={name}
@@ -231,10 +223,10 @@ export default function ProfileScreen() {
 
             {/* Age */}
             <View className="mb-3">
-              <Text className="text-xs font-bold text-gray-700 mb-1 uppercase tracking-wider">
+              <Text className="mb-1 text-xs font-bold tracking-wider text-gray-700 uppercase">
                 나이
               </Text>
-              <View className="flex-row items-center bg-gray-50 border border-gray-200 rounded-2xl px-4 py-3">
+              <View className="flex-row items-center px-4 py-3 border border-gray-200 bg-gray-50 rounded-2xl">
                 <Calendar size={18} color="#9CA3AF" />
                 <TextInput
                   value={age}
@@ -250,7 +242,7 @@ export default function ProfileScreen() {
 
             {/* Bio */}
             <View className="mb-3">
-              <Text className="text-xs font-bold text-gray-700 mb-1 uppercase tracking-wider">
+              <Text className="mb-1 text-xs font-bold tracking-wider text-gray-700 uppercase">
                 자기소개
               </Text>
               <TextInput
@@ -261,7 +253,7 @@ export default function ProfileScreen() {
                 multiline
                 numberOfLines={3}
                 textAlignVertical="top"
-                className="bg-gray-50 border border-gray-200 rounded-2xl px-4 py-3 text-sm text-gray-900 h-24"
+                className="h-24 px-4 py-3 text-sm text-gray-900 border border-gray-200 bg-gray-50 rounded-2xl"
               />
             </View>
 
@@ -337,12 +329,12 @@ export default function ProfileScreen() {
               activeOpacity={0.8}
               onPress={handleSave}
               disabled={loading}
-              className="w-full py-4 bg-rose-500 rounded-2xl items-center justify-center shadow-lg shadow-rose-500/30 mb-8"
+              className="items-center justify-center w-full py-4 mb-8 shadow-lg bg-rose-500 rounded-2xl shadow-rose-500/30"
             >
               {loading ? (
                 <ActivityIndicator color="#FFFFFF" />
               ) : (
-                <Text className="text-white font-bold text-base">
+                <Text className="text-base font-bold text-white">
                   프로필 저장
                 </Text>
               )}

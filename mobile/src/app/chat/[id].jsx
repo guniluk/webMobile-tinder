@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   View,
   Text,
@@ -87,7 +87,7 @@ export default function ChatDetailScreen() {
         }`}
       >
         {!isMe && (
-          <View className="w-8 h-8 rounded-full overflow-hidden bg-gray-200 mr-2 self-end mb-1">
+          <View className="self-end w-8 h-8 mb-1 mr-2 overflow-hidden bg-gray-200 rounded-full">
             {matchUser?.image ? (
               <Image
                 source={{ uri: matchUser.image }}
@@ -95,7 +95,7 @@ export default function ChatDetailScreen() {
                 contentFit="cover"
               />
             ) : (
-              <View className="w-full h-full bg-rose-400 items-center justify-center">
+              <View className="items-center justify-center w-full h-full bg-rose-400">
                 <User size={14} color="#FFFFFF" />
               </View>
             )}
@@ -149,7 +149,7 @@ export default function ChatDetailScreen() {
           </TouchableOpacity>
 
           <View className="relative">
-            <View className="w-10 h-10 rounded-full overflow-hidden bg-gray-100">
+            <View className="w-10 h-10 overflow-hidden bg-gray-100 rounded-full">
               {matchUser?.image ? (
                 <Image
                   source={{ uri: matchUser.image }}
@@ -157,13 +157,13 @@ export default function ChatDetailScreen() {
                   contentFit="cover"
                 />
               ) : (
-                <View className="w-full h-full bg-rose-400 items-center justify-center">
+                <View className="items-center justify-center w-full h-full bg-rose-400">
                   <User size={18} color="#FFFFFF" />
                 </View>
               )}
             </View>
             {isOnline && (
-              <View className="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-emerald-500 border-2 border-white" />
+              <View className="absolute bottom-0 right-0 w-3 h-3 border-2 border-white rounded-full bg-emerald-500" />
             )}
           </View>
 
@@ -177,7 +177,7 @@ export default function ChatDetailScreen() {
           </View>
         </View>
 
-        <View className="w-8 h-8 rounded-full bg-pink-50 items-center justify-center">
+        <View className="items-center justify-center w-8 h-8 rounded-full bg-pink-50">
           <Sparkles size={16} color="#FF4458" />
         </View>
       </View>
@@ -189,18 +189,18 @@ export default function ChatDetailScreen() {
       >
         {/* Messages List */}
         {isLoadingMessages ? (
-          <View className="flex-1 items-center justify-center">
+          <View className="items-center justify-center flex-1">
             <ActivityIndicator size="small" color="#FF4458" />
           </View>
         ) : messages.length === 0 ? (
-          <View className="flex-1 items-center justify-center p-6">
-            <View className="w-16 h-16 rounded-full bg-rose-50 items-center justify-center mb-3">
+          <View className="items-center justify-center flex-1 p-6">
+            <View className="items-center justify-center w-16 h-16 mb-3 rounded-full bg-rose-50">
               <Sparkles size={32} color="#FF4458" />
             </View>
             <Text className="text-base font-bold text-gray-800">
               {matchUser?.name}님과 매치되었습니다!
             </Text>
-            <Text className="text-xs text-gray-400 mt-1 text-center">
+            <Text className="mt-1 text-xs text-center text-gray-400">
               첫 메시지를 보내서 반갑게 인사를 건네보세요 👋
             </Text>
           </View>

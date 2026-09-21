@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -6,7 +6,6 @@ import {
   TouchableOpacity,
   TextInput,
   RefreshControl,
-  ActivityIndicator,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router } from "expo-router";
@@ -47,12 +46,12 @@ export default function MatchesScreen() {
   return (
     <SafeAreaView className="flex-1 bg-white" edges={["top"]}>
       {/* Top Header */}
-      <View className="px-5 py-3 border-b border-gray-100 flex-row items-center justify-between">
-        <Text className="text-2xl font-black text-gray-900 tracking-tight">
+      <View className="flex-row items-center justify-between px-5 py-3 border-b border-gray-100">
+        <Text className="text-2xl font-black tracking-tight text-gray-900">
           매치 & 메시지
         </Text>
         <View className="px-2.5 py-1 bg-rose-50 rounded-full">
-          <Text className="text-rose-600 text-xs font-bold">
+          <Text className="text-xs font-bold text-rose-600">
             {matches.length}개의 매치
           </Text>
         </View>
@@ -85,13 +84,13 @@ export default function MatchesScreen() {
 
         {/* Section 1: New Matches (Horizontal Avatar Scroll) */}
         <View className="py-2">
-          <Text className="px-5 text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">
+          <Text className="px-5 mb-3 text-xs font-bold tracking-wider text-gray-400 uppercase">
             새로운 매치 ({matches.length})
           </Text>
 
           {matches.length === 0 ? (
-            <View className="px-5 py-6 items-center justify-center">
-              <View className="w-14 h-14 rounded-2xl bg-pink-50 items-center justify-center mb-2">
+            <View className="items-center justify-center px-5 py-6">
+              <View className="items-center justify-center mb-2 w-14 h-14 rounded-2xl bg-pink-50">
                 <Flame size={28} color="#FF4458" />
               </View>
               <Text className="text-sm font-semibold text-gray-700">
@@ -117,7 +116,7 @@ export default function MatchesScreen() {
                     key={matchUser._id}
                     activeOpacity={0.8}
                     onPress={() => router.push(`/chat/${matchUser._id}`)}
-                    className="items-center mr-4 w-16"
+                    className="items-center w-16 mr-4"
                   >
                     <View className="relative">
                       <View className="w-16 h-16 rounded-full p-0.5 border-2 border-rose-500 overflow-hidden bg-gray-100 shadow-sm">
@@ -128,7 +127,7 @@ export default function MatchesScreen() {
                             contentFit="cover"
                           />
                         ) : (
-                          <View className="w-full h-full bg-rose-400 items-center justify-center">
+                          <View className="items-center justify-center w-full h-full bg-rose-400">
                             <UserIcon size={24} color="#FFFFFF" />
                           </View>
                         )}
@@ -136,12 +135,12 @@ export default function MatchesScreen() {
 
                       {/* Online Indicator */}
                       {isOnline && (
-                        <View className="absolute bottom-0 right-0 w-4 h-4 rounded-full bg-emerald-500 border-2 border-white" />
+                        <View className="absolute bottom-0 right-0 w-4 h-4 border-2 border-white rounded-full bg-emerald-500" />
                       )}
 
                       {/* Unread Indicator */}
                       {hasUnread && (
-                        <View className="absolute top-0 right-0 w-4 h-4 rounded-full bg-rose-500 border-2 border-white items-center justify-center">
+                        <View className="absolute top-0 right-0 items-center justify-center w-4 h-4 border-2 border-white rounded-full bg-rose-500">
                           <Send size={8} color="#FFFFFF" />
                         </View>
                       )}
@@ -160,15 +159,15 @@ export default function MatchesScreen() {
         </View>
 
         {/* Section 2: Messages / Conversations List */}
-        <View className="px-5 py-4 border-t border-gray-100 mt-2">
-          <Text className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">
+        <View className="px-5 py-4 mt-2 border-t border-gray-100">
+          <Text className="mb-3 text-xs font-bold tracking-wider text-gray-400 uppercase">
             대화 목록
           </Text>
 
           {filteredMatches.length === 0 ? (
-            <View className="py-8 items-center justify-center">
+            <View className="items-center justify-center py-8">
               <MessageCircleHeart size={36} color="#D1D5DB" />
-              <Text className="text-xs text-gray-400 mt-2">
+              <Text className="mt-2 text-xs text-gray-400">
                 {searchQuery ? "검색 결과가 없습니다" : "대화를 시작해보세요"}
               </Text>
             </View>
@@ -191,7 +190,7 @@ export default function MatchesScreen() {
                   >
                     {/* Avatar */}
                     <View className="relative">
-                      <View className="w-14 h-14 rounded-full overflow-hidden bg-gray-100 shadow-sm">
+                      <View className="overflow-hidden bg-gray-100 rounded-full shadow-sm w-14 h-14">
                         {matchUser.image ? (
                           <Image
                             source={{ uri: matchUser.image }}
@@ -199,7 +198,7 @@ export default function MatchesScreen() {
                             contentFit="cover"
                           />
                         ) : (
-                          <View className="w-full h-full bg-rose-400 items-center justify-center">
+                          <View className="items-center justify-center w-full h-full bg-rose-400">
                             <UserIcon size={24} color="#FFFFFF" />
                           </View>
                         )}

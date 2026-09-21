@@ -1,4 +1,3 @@
-import React from "react";
 import { View, Text, Modal, TouchableOpacity } from "react-native";
 import { Image } from "expo-image";
 import { router } from "expo-router";
@@ -25,25 +24,25 @@ export const MatchModal = () => {
       visible={Boolean(newMatchModalUser)}
       onRequestClose={clearNewMatchModalUser}
     >
-      <View className="flex-1 bg-black/80 items-center justify-center p-6">
+      <View className="items-center justify-center flex-1 p-6 bg-black/80">
         {/* Close Button */}
         <TouchableOpacity
           onPress={clearNewMatchModalUser}
-          className="absolute top-14 right-6 w-10 h-10 rounded-full bg-white/20 items-center justify-center"
+          className="absolute items-center justify-center w-10 h-10 rounded-full top-14 right-6 bg-white/20"
         >
           <X size={22} color="#FFFFFF" />
         </TouchableOpacity>
 
-        <Text className="text-4xl font-black text-rose-400 italic mb-2 tracking-wider text-center">
+        <Text className="mb-2 text-4xl italic font-black tracking-wider text-center text-rose-400">
           IT'S A MATCH!
         </Text>
-        <Text className="text-white text-base font-medium mb-8 text-center">
+        <Text className="mb-8 text-base font-medium text-center text-white">
           {newMatchModalUser.name}님과 서로를 마음에 들어합니다!
         </Text>
 
         {/* Matched Avatars */}
         <View className="flex-row items-center justify-center gap-4 mb-10">
-          <View className="w-28 h-28 rounded-full border-4 border-white overflow-hidden shadow-2xl">
+          <View className="overflow-hidden border-4 border-white rounded-full shadow-2xl w-28 h-28">
             {authUser?.image ? (
               <Image
                 source={{ uri: authUser.image }}
@@ -51,19 +50,19 @@ export const MatchModal = () => {
                 contentFit="cover"
               />
             ) : (
-              <View className="w-full h-full bg-rose-400 items-center justify-center">
-                <Text className="text-white text-2xl font-bold">
+              <View className="items-center justify-center w-full h-full bg-rose-400">
+                <Text className="text-2xl font-bold text-white">
                   {authUser?.name?.[0] || "Me"}
                 </Text>
               </View>
             )}
           </View>
 
-          <View className="w-12 h-12 rounded-full bg-rose-500 items-center justify-center shadow-lg -mx-5 z-10 border-2 border-white">
+          <View className="z-10 items-center justify-center w-12 h-12 -mx-5 border-2 border-white rounded-full shadow-lg bg-rose-500">
             <Heart size={24} color="#FFFFFF" fill="#FFFFFF" />
           </View>
 
-          <View className="w-28 h-28 rounded-full border-4 border-white overflow-hidden shadow-2xl">
+          <View className="overflow-hidden border-4 border-white rounded-full shadow-2xl w-28 h-28">
             {newMatchModalUser.image ? (
               <Image
                 source={{ uri: newMatchModalUser.image }}
@@ -71,8 +70,8 @@ export const MatchModal = () => {
                 contentFit="cover"
               />
             ) : (
-              <View className="w-full h-full bg-pink-400 items-center justify-center">
-                <Text className="text-white text-2xl font-bold">
+              <View className="items-center justify-center w-full h-full bg-pink-400">
+                <Text className="text-2xl font-bold text-white">
                   {newMatchModalUser.name?.[0] || "U"}
                 </Text>
               </View>
@@ -85,10 +84,10 @@ export const MatchModal = () => {
           <TouchableOpacity
             activeOpacity={0.8}
             onPress={handleStartChat}
-            className="w-full py-4 bg-rose-500 rounded-2xl flex-row items-center justify-center gap-2 shadow-lg"
+            className="flex-row items-center justify-center w-full gap-2 py-4 shadow-lg bg-rose-500 rounded-2xl"
           >
             <MessageCircle size={20} color="#FFFFFF" />
-            <Text className="text-white font-bold text-base">
+            <Text className="text-base font-bold text-white">
               메시지 보내기
             </Text>
           </TouchableOpacity>
@@ -96,9 +95,9 @@ export const MatchModal = () => {
           <TouchableOpacity
             activeOpacity={0.8}
             onPress={clearNewMatchModalUser}
-            className="w-full py-4 bg-white/10 rounded-2xl items-center justify-center border border-white/20"
+            className="items-center justify-center w-full py-4 border bg-white/10 rounded-2xl border-white/20"
           >
-            <Text className="text-white font-semibold text-sm">
+            <Text className="text-sm font-semibold text-white">
               계속 둘러보기
             </Text>
           </TouchableOpacity>

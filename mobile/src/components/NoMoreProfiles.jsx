@@ -1,4 +1,3 @@
-import React from "react";
 import { View, Text, TouchableOpacity } from "react-native";
 import { Flame, RefreshCw } from "lucide-react-native";
 import { useMatchStore } from "../store/useMatchStore";
@@ -7,17 +6,18 @@ export const NoMoreProfiles = () => {
   const { getUserProfiles, isLoadingProfiles } = useMatchStore();
 
   return (
-    <View className="items-center justify-center p-8 text-center max-w-sm">
-      <View className="w-24 h-24 rounded-full bg-pink-50 items-center justify-center mb-6 shadow-inner">
+    <View className="items-center justify-center max-w-sm p-8 text-center">
+      <View className="items-center justify-center w-24 h-24 mb-6 rounded-full shadow-inner bg-pink-50">
         <Flame size={48} color="#FF4458" />
       </View>
 
-      <Text className="text-2xl font-bold text-gray-900 mb-2">
+      <Text className="mb-2 text-2xl font-bold text-gray-900">
         새로운 상대가 없습니다
       </Text>
 
-      <Text className="text-sm text-gray-500 text-center mb-8 leading-relaxed">
-        주변의 모든 추천 프로필을 확인하셨습니다. 나중에 다시 확인하거나 새로고침 해보세요.
+      <Text className="mb-8 text-sm leading-relaxed text-center text-gray-500">
+        주변의 모든 추천 프로필을 확인하셨습니다. 나중에 다시 확인하거나
+        새로고침 해보세요.
       </Text>
 
       <TouchableOpacity
@@ -34,7 +34,7 @@ export const NoMoreProfiles = () => {
         }}
       >
         <RefreshCw size={18} color="#FFFFFF" />
-        <Text className="text-white font-bold text-sm">
+        <Text className="text-sm font-bold text-white">
           {isLoadingProfiles ? "불러오는 중..." : "다시 찾아보기"}
         </Text>
       </TouchableOpacity>

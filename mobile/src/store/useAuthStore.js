@@ -1,10 +1,10 @@
-import { create } from 'zustand';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import api from '../lib/api';
-import { initializeSocket, disconnectSocket } from '../lib/socket';
+import { create } from "zustand";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import api from "../lib/api";
+import { initializeSocket, disconnectSocket } from "../lib/socket";
 
-const TOKEN_KEY = 'tinder_jwt_token';
-const USER_KEY = 'tinder_auth_user';
+const TOKEN_KEY = "tinder_jwt_token";
+const USER_KEY = "tinder_auth_user";
 
 export const useAuthStore = create((set, get) => ({
   user: null,
@@ -22,8 +22,8 @@ export const useAuthStore = create((set, get) => ({
     const socket = initializeSocket(user._id);
     set({ socket });
 
-    socket.off('getOnlineUsers');
-    socket.on('getOnlineUsers', (users) => {
+    socket.off("getOnlineUsers");
+    socket.on("getOnlineUsers", (users) => {
       set({ onlineUsers: users });
     });
   },
@@ -36,7 +36,7 @@ export const useAuthStore = create((set, get) => ({
   signup: async (signupData) => {
     try {
       set({ loading: true });
-      const response = await api.post('/auth/signup', signupData);
+      const response = await api.post("/auth/signup", signupData);
       const data = response.data;
       const user = data.user || data;
       const token = data.token;
@@ -54,7 +54,7 @@ export const useAuthStore = create((set, get) => ({
       const msg =
         error.response?.data?.message ||
         error.message ||
-        '회원가입에 실패했습니다.';
+        "회원가입에 실패했습니다.";
       throw new Error(msg);
     }
   },
@@ -62,7 +62,7 @@ export const useAuthStore = create((set, get) => ({
   login: async (email, password) => {
     try {
       set({ loading: true });
-      const response = await api.post('/auth/login', { email, password });
+      const response = await api.post("/auth/login", { email, password });
       const data = response.data;
       const user = data.user || data;
       const token = data.token;
@@ -80,14 +80,14 @@ export const useAuthStore = create((set, get) => ({
       const msg =
         error.response?.data?.message ||
         error.message ||
-        '로그인에 실패했습니다.';
+        "로그인에 실패했습니다.";
       throw new Error(msg);
     }
   },
 
   logout: async () => {
     try {
-      await api.post('/auth/logout').catch(() => {});
+      await api.post("/auth/logout").catch(() => {});
     } finally {
       await AsyncStorage.removeItem(TOKEN_KEY);
       await AsyncStorage.removeItem(USER_KEY);
@@ -118,7 +118,7 @@ export const useAuthStore = create((set, get) => ({
       }
 
       // Verify with backend
-      const response = await api.get('/auth/me');
+      const response = await api.get("/auth/me");
       const user = response.data?.user || response.data;
 
       if (user) {
@@ -131,10 +131,10 @@ export const useAuthStore = create((set, get) => ({
         });
         get().connectSocket();
       } else {
-        throw new Error('Invalid user');
+        throw new Error("Invalid user");
       }
     } catch (error) {
-      console.log('Auth verification check failed:', error.message);
+      console.log("Auth verification check failed:", error.message);
       await AsyncStorage.removeItem(TOKEN_KEY);
       await AsyncStorage.removeItem(USER_KEY);
       get().disconnectSocket();
